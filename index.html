@@ -353,22 +353,35 @@
     .ip-time { font-size:.48rem; letter-spacing:.15em; color:var(--muted); white-space:nowrap; width:2.8rem; flex-shrink:0; }
     .ip-time.right { text-align:right; }
     .ip-seek {
-      flex:1; height:2px; background:#1a1a1a; position:relative;
+      flex:1; height:18px; position:relative;
       cursor:pointer; display:flex; align-items:center;
+      user-select:none;
     }
-    .ip-seek:hover { transform:scaleY(2.5); }
+    .ip-seek-track {
+      position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
+      height:2px; background:#1e1e1e; border-radius:1px;
+      transition:height .15s ease;
+    }
+    .ip-seek:hover .ip-seek-track,
+    .ip-seek.dragging .ip-seek-track { height:3px; }
     .ip-seek-fill {
       position:absolute; left:0; top:0; height:100%;
-      background:var(--red); width:0%; pointer-events:none;
-      transition:width .4s linear;
+      background:var(--red); border-radius:1px; width:0%;
+      pointer-events:none;
     }
     .ip-seek-thumb {
       position:absolute; top:50%; transform:translate(-50%,-50%);
-      width:8px; height:8px; border-radius:50%;
-      background:var(--red); pointer-events:none;
-      opacity:0; transition:opacity .2s;
+      width:12px; height:12px; border-radius:50%;
+      background:var(--white); border:2px solid var(--red);
+      pointer-events:none; z-index:2;
+      opacity:0; transition:opacity .15s, transform .15s;
+      box-shadow:0 0 6px rgba(232,0,10,.4);
     }
-    .ip-seek:hover .ip-seek-thumb { opacity:1; }
+    .ip-seek:hover .ip-seek-thumb,
+    .ip-seek.dragging .ip-seek-thumb {
+      opacity:1;
+      transform:translate(-50%,-50%) scale(1.15);
+    }
 
     /* controls row */
     .ip-controls { display:flex; align-items:center; gap:.5rem; }
@@ -490,8 +503,10 @@
 
         <div class="ip-seek-wrap">
           <span class="ip-time" id="ip-cur">0:00</span>
-          <div class="ip-seek" id="ip-seek" onclick="ipSeek(event)">
-            <div class="ip-seek-fill" id="ip-seek-fill"></div>
+          <div class="ip-seek" id="ip-seek">
+            <div class="ip-seek-track">
+              <div class="ip-seek-fill" id="ip-seek-fill"></div>
+            </div>
             <div class="ip-seek-thumb" id="ip-seek-thumb"></div>
           </div>
           <span class="ip-time right" id="ip-dur">0:00</span>
@@ -724,6 +739,7 @@ function enterSite() {
           homepage.style.transition = 'opacity .5s ease';
           homepage.style.opacity    = '1';
           homepage.style.pointerEvents = '';
+          window.scrollTo({ top: 0, behavior: 'instant' });
         }, 260);
 
         setTimeout(() => {
@@ -1115,8 +1131,10 @@ function loadTrack(idx, autoplay) {
     const img = document.createElement('img');
     img.src = t.cover; img.alt = song;
     coverWrap.insertBefore(img, coverWrap.firstChild);
+    setFavicon(t.cover);
   } else {
     ph.style.display = '';
+    setFavicon(null);
   }
 
   document.getElementById('ip-title').textContent = song.toUpperCase();
@@ -1175,11 +1193,88 @@ function playerSeek(e) {
   audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
 }
 
-function ipSeek(e) {
-  if (!audio.duration) return;
-  const bar  = document.getElementById('ip-seek');
-  const rect = bar.getBoundingClientRect();
-  audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+// ── draggable seek bar ──
+(function() {
+  let dragging = false;
+  let wasPlaying = false;
+
+  function getPct(e, bar) {
+    const rect = bar.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  }
+
+  function applyPct(pct) {
+    document.getElementById('ip-seek-fill').style.width = (pct * 100) + '%';
+    document.getElementById('ip-seek-thumb').style.left = (pct * 100) + '%';
+    if (audio.duration) {
+      document.getElementById('ip-cur').textContent = fmtTime(pct * audio.duration);
+    }
+  }
+
+  function startDrag(e) {
+    if (!audio.duration) return;
+    dragging = true;
+    wasPlaying = !audio.paused;
+    if (wasPlaying) audio.pause();
+    document.getElementById('ip-seek').classList.add('dragging');
+    applyPct(getPct(e, document.getElementById('ip-seek')));
+    e.preventDefault();
+  }
+
+  function onDrag(e) {
+    if (!dragging) return;
+    applyPct(getPct(e, document.getElementById('ip-seek')));
+    e.preventDefault();
+  }
+
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    document.getElementById('ip-seek').classList.remove('dragging');
+    const pct = getPct(e.changedTouches ? { clientX: e.changedTouches[0].clientX } : e,
+                       document.getElementById('ip-seek'));
+    if (audio.duration) audio.currentTime = pct * audio.duration;
+    if (wasPlaying) audio.play().catch(()=>{});
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const bar = document.getElementById('ip-seek');
+    bar.addEventListener('mousedown',  startDrag);
+    bar.addEventListener('touchstart', startDrag, { passive:false });
+    window.addEventListener('mousemove',  onDrag);
+    window.addEventListener('touchmove',  onDrag, { passive:false });
+    window.addEventListener('mouseup',    endDrag);
+    window.addEventListener('touchend',   endDrag);
+  });
+})();
+
+function ipSeek(e) { /* handled by drag */ }
+
+// ── favicon: set to cover art of current track ──
+function setFavicon(coverUrl) {
+  let link = document.querySelector("link[rel~='icon']");
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    document.head.appendChild(link);
+  }
+  if (coverUrl) {
+    // draw cover onto canvas → use as favicon
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, 64, 64);
+      link.href = canvas.toDataURL('image/png');
+    };
+    img.onerror = () => { link.href = ''; };
+    img.src = coverUrl;
+  } else {
+    link.href = '';
+  }
 }
 
 </script>
