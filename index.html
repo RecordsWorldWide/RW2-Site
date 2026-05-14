@@ -15,540 +15,225 @@
       --dim: #1a1a1a;
       --muted: #444;
     }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; min-height:100%; background:var(--black); color:var(--white); font-family:'Space Mono',monospace; overflow-x:hidden; }
 
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      width: 100%;
-      min-height: 100%;
-      background: var(--black);
-      color: var(--white);
-      font-family: 'Space Mono', monospace;
-      overflow-x: hidden;
-    }
-
-    /* ── NOISE OVERLAY ── */
+    /* NOISE */
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      pointer-events: none;
-      opacity: 0.035;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      background-size: 200px 200px;
-      animation: grain 0.4s steps(1) infinite;
+      content:''; position:fixed; inset:0; z-index:9999; pointer-events:none; opacity:0.035;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:200px 200px; animation:grain .4s steps(1) infinite;
     }
-
     @keyframes grain {
-      0%,100% { background-position: 0 0; }
-      10% { background-position: -5% -10%; }
-      20% { background-position: -15% 5%; }
-      30% { background-position: 7% -25%; }
-      40% { background-position: -5% 25%; }
-      50% { background-position: -15% 10%; }
-      60% { background-position: 15% 0%; }
-      70% { background-position: 0% 15%; }
-      80% { background-position: 3% 35%; }
-      90% { background-position: -10% 10%; }
+      0%,100%{background-position:0 0} 10%{background-position:-5% -10%} 20%{background-position:-15% 5%}
+      30%{background-position:7% -25%} 40%{background-position:-5% 25%} 50%{background-position:-15% 10%}
+      60%{background-position:15% 0%} 70%{background-position:0% 15%} 80%{background-position:3% 35%} 90%{background-position:-10% 10%}
+    }
+    .grid-bg { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.018; background-image:linear-gradient(to right,#fff 1px,transparent 1px),linear-gradient(to bottom,#fff 1px,transparent 1px); background-size:3.5rem 3.5rem; }
+    @keyframes scanmove { 0%{top:-5%} 100%{top:105%} }
+    .scanline { position:fixed; left:0; width:100%; height:1px; background:rgba(255,255,255,.03); pointer-events:none; z-index:9998; animation:scanmove 7s linear infinite; }
+
+    /* ═══════════════════════════════════════
+       LOADER SCREEN
+    ═══════════════════════════════════════ */
+    #loader {
+      position:fixed; inset:0; z-index:5000;
+      background:var(--black);
+      display:flex; align-items:center; justify-content:center;
+      flex-direction:column; gap:1.5rem;
+      transition:opacity .9s ease;
+    }
+    #loader.fade-out { opacity:0; pointer-events:none; }
+
+    .loader-bar-wrap {
+      width:120px; height:1px; background:#1e1e1e; position:relative; overflow:hidden;
+    }
+    .loader-bar {
+      position:absolute; left:-100%; top:0; height:100%; width:100%;
+      background:var(--white);
+      animation:loadbar 1.4s cubic-bezier(.4,0,.2,1) forwards;
+    }
+    @keyframes loadbar { 0%{left:-100%} 100%{left:0%} }
+    .loader-label {
+      font-size:.55rem; letter-spacing:.45em; text-transform:uppercase; color:#333;
+      animation:loaderblip .8s steps(1) infinite;
+    }
+    @keyframes loaderblip { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ═══════════════════════════════════════
+       ENTRY SCREEN
+    ═══════════════════════════════════════ */
+    #entry {
+      position:fixed; inset:0; z-index:4000;
+      background:var(--black);
+      display:flex; align-items:center; justify-content:center;
+      flex-direction:column;
+      opacity:0; pointer-events:none;
+      transition:opacity .6s ease;
+    }
+    #entry.visible { opacity:1; pointer-events:all; }
+    #entry.fade-out { opacity:0; pointer-events:none; }
+
+    /* The entry morph wrapper — threshold filter applied here */
+    .entry-morph-wrap {
+      position:relative;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+      filter:url('#threshold');
+      /* We need a fixed height so the filter has room */
+      height:clamp(5rem,16vw,14rem);
+      width:100%;
     }
 
-    /* ── GRID ── */
-    .grid-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.018;
-      background-image:
-        linear-gradient(to right, #fff 1px, transparent 1px),
-        linear-gradient(to bottom, #fff 1px, transparent 1px);
-      background-size: 3.5rem 3.5rem;
+    .entry-word {
+      position:absolute;
+      left:50%; transform:translateX(-50%);
+      white-space:nowrap;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(4rem,14vw,12rem);
+      letter-spacing:.06em;
+      color:var(--white);
+      user-select:none;
+      text-align:center;
+      will-change:opacity,filter,transform;
+      /* We'll animate scaleX via JS for the stretch on exit */
+      transform-origin:center center;
     }
 
-    /* ── STAGE ── */
-    #stage {
-      position: relative;
-      z-index: 1;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    .entry-hint {
+      position:absolute;
+      bottom:-2.5rem;
+      left:50%; transform:translateX(-50%);
+      font-size:.55rem;
+      letter-spacing:.4em;
+      text-transform:uppercase;
+      color:#2a2a2a;
+      white-space:nowrap;
+      transition:color .4s;
     }
+    .entry-morph-wrap:hover .entry-hint { color:var(--muted); }
 
-    /* ── LOGO MORPH ── */
+    /* corner labels on entry */
+    .entry-corner { position:fixed; font-size:.5rem; letter-spacing:.3em; text-transform:uppercase; color:#222; }
+    .entry-corner.tl { top:1.5rem; left:1.5rem; }
+    .entry-corner.br { bottom:1.5rem; right:1.5rem; }
+
+    /* ═══════════════════════════════════════
+       HOMEPAGE (hidden until entry clicked)
+    ═══════════════════════════════════════ */
+    #homepage {
+      opacity:0;
+      transition:opacity 1s ease;
+      pointer-events:none;
+    }
+    #homepage.visible { opacity:1; pointer-events:all; }
+
+    @keyframes fadeup { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+    /* STAGE */
+    #stage { position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+
+    /* HOMEPAGE MORPH — with stretch */
     .morph-section {
-      position: relative;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 2rem;
-      filter: url('#threshold');
-      min-height: 14vw;
+      position:relative; width:100%; display:flex; align-items:center; justify-content:center;
+      padding:0 2rem; filter:url('#threshold'); min-height:14vw;
+      /* overflow visible so stretched text doesn't clip */
+      overflow:visible;
     }
-
     .morph-word {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(3rem, 11vw, 10rem);
-      letter-spacing: 0.04em;
-      color: var(--white);
-      user-select: none;
-      text-align: center;
-      will-change: opacity, filter;
+      position:absolute; left:50%;
+      white-space:nowrap;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(3rem,11vw,10rem); letter-spacing:.04em;
+      color:var(--white); user-select:none; text-align:center;
+      will-change:opacity,filter,transform;
+      transform-origin:center center;
+      /* translateX(-50%) is always applied; scaleX added on top via JS */
     }
+    .morph-spacer { visibility:hidden; font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,11vw,10rem); letter-spacing:.04em; padding:.1em 0; white-space:nowrap; }
 
-    .morph-spacer {
-      visibility: hidden;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(3rem, 11vw, 10rem);
-      letter-spacing: 0.04em;
-      padding: 0.1em 0;
-      white-space: nowrap;
-    }
+    .tagline { margin-top:1.5rem; font-size:clamp(.6rem,1.2vw,.85rem); letter-spacing:.35em; text-transform:uppercase; color:var(--muted); text-align:center; opacity:0; animation:fadeup 1s ease .4s forwards; }
+    .line { width:1px; height:60px; background:var(--muted); margin:3rem auto; opacity:0; animation:fadeup 1s ease .7s forwards; }
 
-    /* ── TAGLINE ── */
-    .tagline {
-      margin-top: 1.5rem;
-      font-size: clamp(0.6rem, 1.2vw, 0.85rem);
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-align: center;
-      opacity: 0;
-      animation: fadeup 1s ease 0.8s forwards;
-    }
+    /* ARTISTS */
+    .artists-section { width:100%; max-width:960px; padding:0 2rem; opacity:0; animation:fadeup 1s ease .9s forwards; }
+    .section-label { font-size:.65rem; letter-spacing:.4em; text-transform:uppercase; color:var(--muted); margin-bottom:2rem; }
+    .artists-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; }
+    @media(max-width:600px) { .artists-grid{grid-template-columns:1fr;} }
 
-    @keyframes fadeup {
-      to { opacity: 1; transform: translateY(0); }
-      from { opacity: 0; transform: translateY(8px); }
-    }
+    .artist-card { position:relative; cursor:pointer; overflow:hidden; aspect-ratio:1; background:var(--dim); border:1px solid #1e1e1e; transition:border-color .3s; }
+    .artist-card:hover { border-color:var(--red); }
+    .artist-card img { width:100%; height:100%; object-fit:cover; filter:grayscale(40%) contrast(1.1); transition:filter .4s,transform .5s; }
+    .artist-card:hover img { filter:grayscale(0%) contrast(1.05); transform:scale(1.04); }
+    .artist-card-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,.88) 0%,transparent 55%); display:flex; flex-direction:column; justify-content:flex-end; padding:1.2rem; }
+    .artist-name { font-family:'Bebas Neue',sans-serif; font-size:clamp(1.6rem,3.5vw,2.4rem); letter-spacing:.05em; color:var(--white); line-height:1; }
+    .artist-sub { font-size:.6rem; letter-spacing:.3em; color:var(--muted); text-transform:uppercase; margin-top:.2rem; }
+    .artist-arrow { position:absolute; top:1rem; right:1rem; font-size:.65rem; letter-spacing:.2em; color:var(--red); opacity:0; transition:opacity .3s; text-transform:uppercase; }
+    .artist-card:hover .artist-arrow { opacity:1; }
+    .artist-loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:.6rem; letter-spacing:.2em; color:var(--muted); }
 
-    /* ── DIVIDER ── */
-    .line {
-      width: 1px;
-      height: 60px;
-      background: var(--muted);
-      margin: 3rem auto;
-      opacity: 0;
-      animation: fadeup 1s ease 1.2s forwards;
-    }
+    /* PANEL */
+    #artist-panel { position:fixed; inset:0; z-index:200; background:rgba(4,4,4,.98); display:flex; flex-direction:column; overflow-y:auto; opacity:0; pointer-events:none; transition:opacity .4s ease; }
+    #artist-panel.open { opacity:1; pointer-events:all; }
+    .panel-header { position:sticky; top:0; z-index:10; background:rgba(4,4,4,.95); backdrop-filter:blur(12px); display:flex; align-items:center; justify-content:space-between; padding:1.4rem 2rem; border-bottom:1px solid #1e1e1e; }
+    .panel-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(2rem,6vw,4rem); letter-spacing:.08em; color:var(--white); line-height:1; }
+    .panel-close { background:none; border:1px solid var(--muted); color:var(--white); font-family:'Space Mono',monospace; font-size:.6rem; letter-spacing:.3em; text-transform:uppercase; padding:.5rem 1rem; cursor:pointer; transition:border-color .2s,color .2s; }
+    .panel-close:hover { border-color:var(--red); color:var(--red); }
+    .panel-body { padding:2.5rem 2rem 4rem; max-width:1000px; margin:0 auto; width:100%; }
 
-    /* ── ARTISTS SECTION ── */
-    .artists-section {
-      width: 100%;
-      max-width: 960px;
-      padding: 0 2rem 0;
-      opacity: 0;
-      animation: fadeup 1s ease 1.4s forwards;
-    }
+    .panel-artist-hero { display:flex; align-items:flex-end; gap:2rem; margin-bottom:3rem; padding-bottom:2.5rem; border-bottom:1px solid #1e1e1e; }
+    @media(max-width:600px) { .panel-artist-hero{flex-direction:column;align-items:flex-start;} }
+    .panel-artist-img { width:110px; height:110px; border-radius:50%; object-fit:cover; filter:grayscale(15%); flex-shrink:0; border:1px solid #222; }
+    .panel-artist-info h2 { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.5rem,6vw,4.5rem); letter-spacing:.06em; line-height:.9; color:var(--white); }
+    .panel-artist-info .sub { font-size:.6rem; letter-spacing:.3em; color:var(--muted); margin-top:.5rem; text-transform:uppercase; }
+    .spotify-link { display:inline-flex; align-items:center; gap:.4rem; margin-top:.8rem; font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:#1DB954; text-decoration:none; border:1px solid #1DB954; padding:.35rem .7rem; transition:background .2s; }
+    .spotify-link:hover { background:rgba(29,185,84,.1); }
 
-    .section-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.4em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 2rem;
-    }
+    .panel-section-label { font-size:.6rem; letter-spacing:.4em; text-transform:uppercase; color:var(--muted); margin-bottom:1.5rem; }
 
-    .artists-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
-    }
+    .releases-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-bottom:4rem; }
+    @media(max-width:600px) { .releases-row{grid-template-columns:1fr 1fr;} }
 
-    @media (max-width: 600px) {
-      .artists-grid { grid-template-columns: 1fr; }
-    }
+    .release-card { display:flex; flex-direction:column; gap:.8rem; text-decoration:none; color:var(--white); cursor:pointer; transition:transform .25s; }
+    .release-card:hover { transform:translateY(-4px); }
+    .release-cover-wrap { position:relative; width:100%; aspect-ratio:1; overflow:hidden; background:#111; }
+    .release-cover-wrap img { width:100%; height:100%; object-fit:cover; filter:grayscale(25%) contrast(1.05); transition:filter .35s,transform .4s; display:block; }
+    .release-card:hover .release-cover-wrap img { filter:grayscale(0%); transform:scale(1.04); }
+    .release-play-btn { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.5); opacity:0; transition:opacity .3s; }
+    .release-card:hover .release-play-btn { opacity:1; }
+    .release-play-btn svg { width:44px; height:44px; fill:#fff; }
+    .release-type-badge { position:absolute; top:.6rem; left:.6rem; font-size:.5rem; letter-spacing:.25em; text-transform:uppercase; background:rgba(0,0,0,.75); border:1px solid #333; color:var(--muted); padding:.2rem .4rem; font-family:'Space Mono',monospace; }
+    .release-meta { display:flex; flex-direction:column; gap:.15rem; }
+    .release-title { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:.06em; line-height:1.1; }
+    .release-date { font-size:.55rem; letter-spacing:.2em; color:var(--muted); text-transform:uppercase; }
+    .release-skeleton { background:#111; border:1px solid #1a1a1a; aspect-ratio:1; }
+    .panel-loading { font-size:.65rem; letter-spacing:.3em; color:var(--muted); padding:2rem 0; }
 
-    .artist-card {
-      position: relative;
-      cursor: pointer;
-      overflow: hidden;
-      aspect-ratio: 1;
-      background: var(--dim);
-      border: 1px solid #1e1e1e;
-      transition: border-color 0.3s;
-    }
+    /* FOOTER */
+    footer { width:100%; position:relative; z-index:1; margin-top:6rem; border-top:1px solid #1a1a1a; }
+    .footer-inner { max-width:960px; margin:0 auto; padding:3rem 2rem; display:flex; flex-direction:column; gap:2rem; }
+    .footer-join-label { font-size:.6rem; letter-spacing:.4em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:.6rem; }
+    .footer-join-btn { display:inline-flex; align-items:center; gap:.5rem; font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; color:var(--white); background:none; border:1px solid var(--muted); padding:.6rem 1.2rem; cursor:pointer; transition:border-color .2s,color .2s; }
+    .footer-join-btn:hover { border-color:var(--red); color:var(--red); }
+    .footer-copy { font-size:.55rem; letter-spacing:.2em; color:#333; line-height:1.8; max-width:520px; }
 
-    .artist-card:hover {
-      border-color: var(--red);
-    }
-
-    .artist-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: grayscale(40%) contrast(1.1);
-      transition: filter 0.4s, transform 0.5s;
-    }
-
-    .artist-card:hover img {
-      filter: grayscale(0%) contrast(1.05);
-      transform: scale(1.04);
-    }
-
-    .artist-card-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 1.2rem;
-    }
-
-    .artist-name {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-      letter-spacing: 0.05em;
-      color: var(--white);
-      line-height: 1;
-    }
-
-    .artist-sub {
-      font-size: 0.6rem;
-      letter-spacing: 0.3em;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-top: 0.2rem;
-    }
-
-    .artist-arrow {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      color: var(--red);
-      opacity: 0;
-      transition: opacity 0.3s;
-      text-transform: uppercase;
-    }
-
-    .artist-card:hover .artist-arrow { opacity: 1; }
-
-    /* ── LOADING PLACEHOLDER ── */
-    .artist-loading {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      color: var(--muted);
-    }
-
-    /* ── ARTIST OVERLAY PANEL ── */
-    #artist-panel {
-      position: fixed;
-      inset: 0;
-      z-index: 200;
-      background: rgba(4,4,4,0.97);
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s ease;
-    }
-
-    #artist-panel.open {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .panel-header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: rgba(4,4,4,0.95);
-      backdrop-filter: blur(10px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid #1e1e1e;
-    }
-
-    .panel-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(2rem, 6vw, 4rem);
-      letter-spacing: 0.08em;
-      color: var(--white);
-      line-height: 1;
-    }
-
-    .panel-close {
-      background: none;
-      border: 1px solid var(--muted);
-      color: var(--white);
-      font-family: 'Space Mono', monospace;
-      font-size: 0.6rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
-    }
-
-    .panel-close:hover { border-color: var(--red); color: var(--red); }
-
-    .panel-body {
-      padding: 2rem;
-      max-width: 960px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .panel-artist-header {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 2.5rem;
-      padding-bottom: 2rem;
-      border-bottom: 1px solid #1e1e1e;
-    }
-
-    .panel-artist-img {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      filter: grayscale(20%);
-      flex-shrink: 0;
-    }
-
-    .panel-artist-info h2 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2.5rem;
-      letter-spacing: 0.08em;
-      line-height: 1;
-    }
-
-    .panel-artist-info p {
-      font-size: 0.65rem;
-      letter-spacing: 0.25em;
-      color: var(--muted);
-      margin-top: 0.3rem;
-      text-transform: uppercase;
-    }
-
-    .spotify-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-top: 0.6rem;
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #1DB954;
-      text-decoration: none;
-      border: 1px solid #1DB954;
-      padding: 0.3rem 0.6rem;
-      transition: background 0.2s;
-    }
-
-    .spotify-link:hover { background: rgba(29,185,84,0.1); }
-
-    .releases-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.4em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 1.5rem;
-    }
-
-    .releases-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .release-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      text-decoration: none;
-      color: var(--white);
-      transition: transform 0.2s;
-    }
-
-    .release-item:hover { transform: translateY(-3px); }
-
-    .release-cover {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      filter: grayscale(20%) contrast(1.05);
-      transition: filter 0.3s;
-    }
-
-    .release-item:hover .release-cover { filter: grayscale(0%) contrast(1.05); }
-
-    .release-name {
-      font-size: 0.75rem;
-      line-height: 1.3;
-      font-weight: 700;
-    }
-
-    .release-type {
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .panel-loading {
-      font-size: 0.65rem;
-      letter-spacing: 0.3em;
-      color: var(--muted);
-      padding: 2rem 0;
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      width: 100%;
-      position: relative;
-      z-index: 1;
-      margin-top: 6rem;
-      border-top: 1px solid #1a1a1a;
-    }
-
-    .footer-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 3rem 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 2rem;
-    }
-
-    .footer-join {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-
-    .footer-join-label {
-      font-size: 0.6rem;
-      letter-spacing: 0.4em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .footer-join-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--white);
-      background: none;
-      border: 1px solid var(--muted);
-      padding: 0.6rem 1.2rem;
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
-    }
-
-    .footer-join-btn:hover { border-color: var(--red); color: var(--red); }
-
-    .footer-copy {
-      font-size: 0.55rem;
-      letter-spacing: 0.2em;
-      color: #333;
-      line-height: 1.8;
-      max-width: 520px;
-    }
-
-    /* ── FORM OVERLAY ── */
-    #form-panel {
-      position: fixed;
-      inset: 0;
-      z-index: 300;
-      background: rgba(4,4,4,0.97);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding-top: 2rem;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s ease;
-      overflow-y: auto;
-    }
-
-    #form-panel.open {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .form-panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 680px;
-      padding: 0 1rem 1.5rem;
-    }
-
-    .form-panel-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2.5rem;
-      letter-spacing: 0.1em;
-    }
-
-    .form-embed {
-      width: 100%;
-      max-width: 680px;
-      padding: 0 1rem 2rem;
-    }
-
-    .form-embed iframe {
-      width: 100%;
-      height: 900px;
-      border: none;
-      background: transparent;
-    }
-
-    /* ── SCAN LINE ── */
-    @keyframes scanmove {
-      0% { top: -5%; }
-      100% { top: 105%; }
-    }
-
-    .scanline {
-      position: fixed;
-      left: 0;
-      width: 100%;
-      height: 1px;
-      background: rgba(255,255,255,0.03);
-      pointer-events: none;
-      z-index: 9998;
-      animation: scanmove 7s linear infinite;
-    }
+    /* FORM */
+    #form-panel { position:fixed; inset:0; z-index:300; background:rgba(4,4,4,.97); display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:2rem; opacity:0; pointer-events:none; transition:opacity .4s ease; overflow-y:auto; }
+    #form-panel.open { opacity:1; pointer-events:all; }
+    .form-panel-header { display:flex; align-items:center; justify-content:space-between; width:100%; max-width:680px; padding:0 1rem 1.5rem; }
+    .form-panel-title { font-family:'Bebas Neue',sans-serif; font-size:2.5rem; letter-spacing:.1em; }
+    .form-embed { width:100%; max-width:680px; padding:0 1rem 2rem; }
+    .form-embed iframe { width:100%; height:900px; border:none; }
   </style>
 </head>
 <body>
 
-<!-- SVG filters -->
+<!-- SVG Filters -->
 <svg style="position:absolute;height:0;width:0" aria-hidden="true">
   <defs>
     <filter id="threshold" color-interpolation-filters="sRGB">
       <feColorMatrix in="SourceGraphic" type="matrix"
-        values="1 0 0 0 0
-                0 1 0 0 0
-                0 0 1 0 0
-                0 0 0 20 -8"/>
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8"/>
     </filter>
   </defs>
 </svg>
@@ -556,226 +241,425 @@
 <div class="grid-bg"></div>
 <div class="scanline"></div>
 
-<!-- ── MAIN STAGE ── -->
-<div id="stage">
-
-  <!-- LOGO MORPH -->
-  <div class="morph-section" id="morph">
-    <span class="morph-spacer" aria-hidden="true">Records World Wide</span>
-    <span class="morph-word" id="mw1">Records World Wide</span>
-    <span class="morph-word" id="mw2">RW2</span>
-  </div>
-
-  <p class="tagline">experimental music collective · worldwide</p>
-  <div class="line"></div>
-
-  <!-- ARTISTS -->
-  <div class="artists-section">
-    <p class="section-label">// artists</p>
-    <div class="artists-grid" id="artists-grid">
-      <!-- populated by JS -->
-    </div>
-  </div>
-
+<!-- ═══════════ LOADER ═══════════ -->
+<div id="loader">
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+  <div class="loader-label">initializing signal</div>
 </div>
 
-<!-- ── FOOTER ── -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-join">
-      <span class="footer-join-label">// join the network</span>
-      <button class="footer-join-btn" onclick="openForm()">Want to join? →</button>
+<!-- ═══════════ ENTRY SCREEN ═══════════ -->
+<div id="entry">
+  <div class="entry-morph-wrap" id="entry-morph" onclick="enterSite()">
+    <!-- RW2 is base; ENTER morphs in on hover -->
+    <span class="entry-word" id="ew-rw2">RW2</span>
+    <span class="entry-word" id="ew-enter">ENTER</span>
+    <span class="entry-hint">hover · click to enter</span>
+  </div>
+  <div class="entry-corner tl">RW2</div>
+  <div class="entry-corner br">Records World Wide</div>
+</div>
+
+<!-- ═══════════ HOMEPAGE ═══════════ -->
+<div id="homepage">
+  <div id="stage">
+    <!-- HOMEPAGE LOGO MORPH with stretch -->
+    <div class="morph-section" id="home-morph">
+      <span class="morph-spacer" aria-hidden="true">Records World Wide</span>
+      <span class="morph-word" id="mw1">Records World Wide</span>
+      <span class="morph-word" id="mw2">RW2</span>
     </div>
-    <div class="footer-copy">
-      2026 © RW2 — Records World Wide is a non-registered or trademarked business under general copyright laws.<br>
-      no borders · no genre · just signal
+
+    <p class="tagline">experimental music collective · worldwide</p>
+    <div class="line"></div>
+
+    <div class="artists-section">
+      <p class="section-label">// artists</p>
+      <div class="artists-grid" id="artists-grid"></div>
     </div>
   </div>
-</footer>
 
-<!-- ── ARTIST PANEL ── -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <span class="footer-join-label">// join the network</span>
+        <button class="footer-join-btn" onclick="openForm()">Want to join? →</button>
+      </div>
+      <div class="footer-copy">
+        2026 © RW2 — Records World Wide is a non-registered or trademarked business under general copyright laws.<br>
+        no borders · no genre · just signal
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════ ARTIST PANEL ═══════════ -->
 <div id="artist-panel">
   <div class="panel-header">
     <span class="panel-title" id="panel-title">—</span>
     <button class="panel-close" onclick="closeArtistPanel()">✕ close</button>
   </div>
   <div class="panel-body" id="panel-body">
-    <p class="panel-loading">loading signal...</p>
+    <p class="panel-loading">pulling signal...</p>
   </div>
 </div>
 
-<!-- ── FORM PANEL ── -->
+<!-- ═══════════ FORM PANEL ═══════════ -->
 <div id="form-panel">
   <div class="form-panel-header">
     <span class="form-panel-title">Join RW2</span>
     <button class="panel-close" onclick="closeForm()">✕ close</button>
   </div>
   <div class="form-embed">
-    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfCqNg_p1ED6ppeUjJzvkLmaUn7elS4-c_dfDjR4iu6jh8O4Q/viewform?embedded=true"
-      frameborder="0" marginheight="0" marginwidth="0" loading="lazy">Loading…</iframe>
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfCqNg_p1ED6ppeUjJzvkLmaUn7elS4-c_dfDjR4iu6jh8O4Q/viewform?embedded=true" frameborder="0" marginheight="0" marginwidth="0" loading="lazy">Loading…</iframe>
   </div>
 </div>
 
 <script>
-  // ── MORPH ANIMATION ──
+// ════════════════════════════════════════════
+//  LOADER → ENTRY
+// ════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const loader = document.getElementById('loader');
+  const entry  = document.getElementById('entry');
+
+  // After bar finishes (~1.5s), fade out loader, show entry
+  setTimeout(() => {
+    loader.classList.add('fade-out');
+    setTimeout(() => {
+      loader.style.display = 'none';
+      entry.classList.add('visible');
+      initEntryMorph();
+    }, 900);
+  }, 1500);
+});
+
+// ════════════════════════════════════════════
+//  ENTRY MORPH: RW2 ↔ ENTER on hover
+// ════════════════════════════════════════════
+function initEntryMorph() {
+  const wrap   = document.getElementById('entry-morph');
+  const ewRW2  = document.getElementById('ew-rw2');
+  const ewEnter = document.getElementById('ew-enter');
+
+  // Initial state: RW2 visible, ENTER hidden
+  ewRW2.style.opacity   = '1';
+  ewRW2.style.filter    = 'blur(0px)';
+  ewEnter.style.opacity = '0.003';
+  ewEnter.style.filter  = 'blur(40px)';
+
+  let hovering = false;
+  let animId = null;
+  let progress = 0; // 0 = RW2, 1 = ENTER
+
+  const SPEED = 0.018; // progress per frame
+
+  function smoothstep(t) { return t * t * (3 - 2 * t); }
+
+  function animate() {
+    if (hovering && progress < 1) {
+      progress = Math.min(progress + SPEED, 1);
+    } else if (!hovering && progress > 0) {
+      progress = Math.max(progress - SPEED, 0);
+    } else {
+      animId = null;
+      return;
+    }
+
+    const p = smoothstep(progress);
+    // RW2 fades out
+    ewRW2.style.opacity = String(1 - p * (1 - 0.003));
+    ewRW2.style.filter  = `blur(${p * 36}px)`;
+    // ENTER fades in
+    ewEnter.style.opacity = String(0.003 + p * (1 - 0.003));
+    ewEnter.style.filter  = `blur(${(1 - p) * 36}px)`;
+
+    animId = requestAnimationFrame(animate);
+  }
+
+  wrap.addEventListener('mouseenter', () => {
+    hovering = true;
+    if (!animId) animId = requestAnimationFrame(animate);
+  });
+
+  wrap.addEventListener('mouseleave', () => {
+    hovering = false;
+    if (!animId) animId = requestAnimationFrame(animate);
+  });
+}
+
+// ════════════════════════════════════════════
+//  ENTER SITE — sexy fade transition
+// ════════════════════════════════════════════
+let entryDone = false;
+function enterSite() {
+  if (entryDone) return;
+  entryDone = true;
+
+  const entry    = document.getElementById('entry');
+  const homepage = document.getElementById('homepage');
+  const ewEnter  = document.getElementById('ew-enter');
+  const ewRW2    = document.getElementById('ew-rw2');
+
+  // Quick stretch-out on ENTER word before fade
+  const activeWord = parseFloat(ewEnter.style.opacity) > 0.5 ? ewEnter : ewRW2;
+  activeWord.style.transition = 'transform .45s cubic-bezier(.4,0,.6,1), opacity .45s ease, filter .45s ease';
+  activeWord.style.transform  = 'translateX(-50%) scaleX(1.6)';
+  activeWord.style.opacity    = '0';
+  activeWord.style.filter     = 'blur(20px)';
+
+  // Fade out entry, fade in homepage
+  setTimeout(() => {
+    entry.classList.add('fade-out');
+    homepage.classList.add('visible');
+    setTimeout(() => { entry.style.display = 'none'; }, 900);
+  }, 380);
+
+  // Start homepage morph loop
+  setTimeout(() => startHomeMorph(), 600);
+  // Build artist cards
+  buildCards();
+}
+
+// ════════════════════════════════════════════
+//  HOMEPAGE MORPH with STRETCH
+// ════════════════════════════════════════════
+function startHomeMorph() {
   const mw1 = document.getElementById('mw1');
   const mw2 = document.getElementById('mw2');
-  const HOLD = 2600, TRANS = 1600;
+
+  const HOLD  = 2600; // ms each word shown
+  const TRANS = 1600; // ms transition
+  // Stretch peaks midway through transition — scaleX goes e.g. 1 → 1.18 → 1
+  // For the long word (Records World Wide → RW2), the FROM word stretches out
+  // and the TO word stretches in from narrow to normal.
+  const STRETCH_OUT = 1.22; // from-word max stretch before dissolving
+  const STRETCH_IN  = 0.82; // to-word starts squished then expands
+
   let t0 = performance.now(), showing = 1;
+
   function smoothstep(t) { return t * t * (3 - 2 * t); }
-  function morphFrame(now) {
+  // Arch curve: goes 0→1→0 over t in [0,1]
+  function arch(t) { return 4 * t * (1 - t); }
+
+  function frame(now) {
     const e = now - t0;
+
     if (e < HOLD) {
-      if (showing === 1) {
-        mw1.style.opacity = 1; mw1.style.filter = 'blur(0px)';
-        mw2.style.opacity = 0.003; mw2.style.filter = 'blur(40px)';
-      } else {
-        mw2.style.opacity = 1; mw2.style.filter = 'blur(0px)';
-        mw1.style.opacity = 0.003; mw1.style.filter = 'blur(40px)';
-      }
+      // Holding — show current word cleanly
+      const cur = showing === 1 ? mw1 : mw2;
+      const other = showing === 1 ? mw2 : mw1;
+      cur.style.opacity   = '1';
+      cur.style.filter    = 'blur(0px)';
+      cur.style.transform = 'translateX(-50%) scaleX(1)';
+      other.style.opacity = '0.003';
+      other.style.filter  = 'blur(40px)';
+      other.style.transform = 'translateX(-50%) scaleX(1)';
     } else {
-      const p = smoothstep(Math.min((e - HOLD) / TRANS, 1));
+      const raw = Math.min((e - HOLD) / TRANS, 1);
+      const p   = smoothstep(raw);   // eased progress
+      const a   = arch(raw);         // peaks at 0.5
+
       const from = showing === 1 ? mw1 : mw2;
-      const to = showing === 1 ? mw2 : mw1;
-      from.style.opacity = 1 - p * (1 - 0.003);
-      from.style.filter = `blur(${p * 40}px)`;
-      to.style.opacity = 0.003 + p * (1 - 0.003);
-      to.style.filter = `blur(${(1 - p) * 40}px)`;
-      if (e > HOLD + TRANS) { showing = showing === 1 ? 2 : 1; t0 = now; }
-    }
-    requestAnimationFrame(morphFrame);
-  }
-  requestAnimationFrame(morphFrame);
+      const to   = showing === 1 ? mw2 : mw1;
 
-  // ── ARTISTS CONFIG ──
-  const ARTISTS = [
-    {
-      name: 'lyko',
-      spotifyId: '4a4GK5fSd7g9ikiIrr9bGj',
-      spotifyUrl: 'https://open.spotify.com/artist/4a4GK5fSd7g9ikiIrr9bGj'
-    },
-    {
-      name: 'zep',
-      spotifyId: '0YxYDlhiNqJoC3bBtVCUzc',
-      spotifyUrl: 'https://open.spotify.com/artist/0YxYDlhiNqJoC3bBtVCUzc'
-    },
-    {
-      name: 'radiosurgeryy',
-      spotifyId: '28EkaMU18bUxqlrriy4WSO',
-      spotifyUrl: 'https://open.spotify.com/artist/28EkaMU18bUxqlrriy4WSO'
-    }
-  ];
+      // FROM: fade out + stretch wide as it dissolves
+      from.style.opacity   = String(1 - p * (1 - 0.003));
+      from.style.filter    = `blur(${p * 40}px)`;
+      from.style.transform = `translateX(-50%) scaleX(${1 + a * (STRETCH_OUT - 1)})`;
 
-  // ── SPOTIFY oEmbed + fallback placeholder ──
-  // We use Spotify's public oEmbed to pull artist image (no token needed for artist images)
-  // For releases we use the public embed endpoint.
+      // TO: fade in + un-squish from narrow to normal
+      to.style.opacity   = String(0.003 + p * (1 - 0.003));
+      to.style.filter    = `blur(${(1 - p) * 40}px)`;
+      // Start compressed, expand to 1 as it arrives
+      const toScale = STRETCH_IN + p * (1 - STRETCH_IN);
+      to.style.transform = `translateX(-50%) scaleX(${toScale})`;
 
-  async function getArtistData(artist) {
-    // Spotify oEmbed gives us thumbnail (artist image) — no auth required
-    try {
-      const oembed = await fetch(
-        `https://open.spotify.com/oembed?url=${encodeURIComponent(artist.spotifyUrl)}`
-      );
-      if (oembed.ok) {
-        const data = await oembed.json();
-        return { img: data.thumbnail_url, title: data.title };
+      if (e > HOLD + TRANS) {
+        showing = showing === 1 ? 2 : 1;
+        t0 = now;
       }
-    } catch(e) {}
-    return { img: null, title: artist.name };
-  }
-
-  // Build artist cards using oEmbed images
-  async function buildArtistCards() {
-    const grid = document.getElementById('artists-grid');
-    grid.innerHTML = '';
-    for (const artist of ARTISTS) {
-      const card = document.createElement('div');
-      card.className = 'artist-card';
-      card.innerHTML = `<div class="artist-loading">loading...</div>`;
-      card.addEventListener('click', () => openArtistPanel(artist));
-      grid.appendChild(card);
-
-      getArtistData(artist).then(({ img }) => {
-        card.innerHTML = `
-          ${img ? `<img src="${img}" alt="${artist.name}" loading="lazy"/>` : `<div style="width:100%;height:100%;background:#111;"></div>`}
-          <div class="artist-card-overlay">
-            <div class="artist-name">${artist.name}</div>
-            <div class="artist-sub">on spotify ↗</div>
-          </div>
-          <div class="artist-arrow">view →</div>
-        `;
-        card.addEventListener('click', () => openArtistPanel(artist));
-      });
     }
+    requestAnimationFrame(frame);
   }
 
-  buildArtistCards();
+  // Init
+  mw1.style.opacity   = '1';
+  mw1.style.filter    = 'blur(0px)';
+  mw1.style.transform = 'translateX(-50%) scaleX(1)';
+  mw2.style.opacity   = '0.003';
+  mw2.style.filter    = 'blur(40px)';
+  mw2.style.transform = 'translateX(-50%) scaleX(1)';
 
-  // ── ARTIST PANEL ──
-  async function openArtistPanel(artist) {
-    const panel = document.getElementById('artist-panel');
-    const title = document.getElementById('panel-title');
-    const body = document.getElementById('panel-body');
-    title.textContent = artist.name;
-    body.innerHTML = `<p class="panel-loading">pulling files...</p>`;
-    panel.classList.add('open');
-    document.body.style.overflow = 'hidden';
+  requestAnimationFrame(frame);
+}
 
-    // Load artist image via oEmbed
-    const { img } = await getArtistData(artist);
+// ════════════════════════════════════════════
+//  ARTISTS
+// ════════════════════════════════════════════
+const ARTISTS = [
+  {name:'lyko',         id:'4a4GK5fSd7g9ikiIrr9bGj', url:'https://open.spotify.com/artist/4a4GK5fSd7g9ikiIrr9bGj'},
+  {name:'zep',          id:'0YxYDlhiNqJoC3bBtVCUzc', url:'https://open.spotify.com/artist/0YxYDlhiNqJoC3bBtVCUzc'},
+  {name:'radiosurgeryy',id:'28EkaMU18bUxqlrriy4WSO',  url:'https://open.spotify.com/artist/28EkaMU18bUxqlrriy4WSO'}
+];
 
-    // We embed the Spotify artist page via embed iframe for latest releases
-    // This gives us real Spotify data visually, no API key needed
-    body.innerHTML = `
-      <div class="panel-artist-header">
-        ${img ? `<img class="panel-artist-img" src="${img}" alt="${artist.name}"/>` : ''}
-        <div class="panel-artist-info">
-          <h2>${artist.name}</h2>
-          <p>rw2 collective</p>
-          <a class="spotify-link" href="${artist.spotifyUrl}" target="_blank" rel="noopener">
-            ▶ open on spotify
-          </a>
+async function getArtistImg(artist) {
+  try {
+    const r = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(artist.url)}`);
+    if (r.ok) { const d = await r.json(); return d.thumbnail_url || null; }
+  } catch(e) {}
+  return null;
+}
+
+async function buildCards() {
+  const grid = document.getElementById('artists-grid');
+  if (grid.children.length > 0) return; // already built
+  for (const a of ARTISTS) {
+    const card = document.createElement('div');
+    card.className = 'artist-card';
+    card.innerHTML = `<div class="artist-loading">loading...</div>`;
+    grid.appendChild(card);
+    card.onclick = () => openArtistPanel(a);
+    getArtistImg(a).then(img => {
+      card.innerHTML = `
+        ${img ? `<img src="${img}" alt="${a.name}" loading="lazy"/>` : '<div style="width:100%;height:100%;background:#111"></div>'}
+        <div class="artist-card-overlay">
+          <div class="artist-name">${a.name}</div>
+          <div class="artist-sub">rw2 collective</div>
         </div>
+        <div class="artist-arrow">view →</div>`;
+      card.onclick = () => openArtistPanel(a);
+    });
+  }
+}
+
+function fmtDate(str) {
+  if (!str) return '';
+  try {
+    const parts = str.split('-');
+    if (parts.length === 1) return parts[0];
+    return new Date(str).toLocaleDateString('en-US', {year:'numeric',month:'short',...(parts.length>2?{day:'numeric'}:{})});
+  } catch(e) { return str; }
+}
+
+async function openArtistPanel(artist) {
+  const panel = document.getElementById('artist-panel');
+  const title = document.getElementById('panel-title');
+  const body  = document.getElementById('panel-body');
+  title.textContent = artist.name;
+  body.innerHTML = `<p class="panel-loading">pulling signal...</p>`;
+  panel.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const img = await getArtistImg(artist);
+
+  body.innerHTML = `
+    <div class="panel-artist-hero">
+      ${img ? `<img class="panel-artist-img" src="${img}" alt="${artist.name}"/>` : ''}
+      <div class="panel-artist-info">
+        <h2>${artist.name}</h2>
+        <p class="sub">rw2 collective · worldwide</p>
+        <a class="spotify-link" href="${artist.url}" target="_blank" rel="noopener">▶ open on spotify</a>
       </div>
-      <p class="releases-label">// latest releases</p>
-      <div style="width:100%;max-width:700px;">
-        <iframe
-          style="border-radius:0;border:1px solid #1a1a1a;"
-          src="https://open.spotify.com/embed/artist/${artist.spotifyId}?utm_source=generator&theme=0"
-          width="100%"
-          height="380"
-          frameBorder="0"
-          allowfullscreen=""
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy">
-        </iframe>
-      </div>
-    `;
-  }
+    </div>
 
-  function closeArtistPanel() {
-    document.getElementById('artist-panel').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+    <p class="panel-section-label">// latest releases</p>
+    <div class="releases-row" id="releases-${artist.id}">
+      ${[0,1,2].map(()=>`<div class="release-skeleton"></div>`).join('')}
+    </div>
 
-  // ── FORM PANEL ──
-  function openForm() {
-    document.getElementById('form-panel').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
+    <p class="panel-section-label" style="margin-top:1rem;">// top tracks</p>
+    <div style="width:100%;margin-bottom:2rem;">
+      <iframe
+        style="border-radius:0;border:1px solid #1a1a1a;"
+        src="https://open.spotify.com/embed/artist/${artist.id}?utm_source=generator&theme=0"
+        width="100%" height="380"
+        frameBorder="0" allowfullscreen=""
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy">
+      </iframe>
+    </div>
+  `;
 
-  function closeForm() {
-    document.getElementById('form-panel').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+  loadReleases(artist);
+}
 
-  // ESC to close
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      closeArtistPanel();
-      closeForm();
+async function loadReleases(artist) {
+  const container = document.getElementById(`releases-${artist.id}`);
+  if (!container) return;
+  try {
+    const resp = await fetch(`https://open.spotify.com/embed/artist/${artist.id}`, {headers:{'Accept':'text/html'}});
+    const html = await resp.text();
+    let releases = [];
+    const scriptMatches = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)];
+    for (const m of scriptMatches) {
+      const txt = m[1];
+      if (txt.includes('"album_type"')||txt.includes('"type":"album"')||txt.includes('"type":"single"')) {
+        const jsonMatches = [...txt.matchAll(/\{[^{}]*"id"\s*:\s*"[0-9A-Za-z]{22}"[^{}]*"type"\s*:\s*"(?:album|single|compilation)"[^{}]*\}/g)];
+        for (const jm of jsonMatches) { try { releases.push(JSON.parse(jm[0])); } catch(e) {} }
+        const blob = extractJSON(txt, '{"props"');
+        if (blob) { try { collectAlbums(JSON.parse(blob), releases); } catch(e) {} }
+      }
     }
-  });
+    const seen = new Set();
+    releases = releases.filter(r => { if(!r.id||seen.has(r.id)) return false; seen.add(r.id); return true; });
+    releases.sort((a,b) => (b.release_date||b.releaseDate||'').localeCompare(a.release_date||a.releaseDate||''));
+    releases = releases.slice(0,3);
+    if (releases.length > 0) { renderReleases(container, releases); return; }
+  } catch(e) {}
+  renderReleaseFallback(container, artist);
+}
+
+function collectAlbums(obj, arr, depth=0) {
+  if (depth>12||!obj||typeof obj!=='object') return;
+  if (Array.isArray(obj)) { obj.forEach(x=>collectAlbums(x,arr,depth+1)); return; }
+  if ((obj.type==='album'||obj.type==='single'||obj.album_type)&&obj.id&&obj.name) arr.push(obj);
+  Object.values(obj).forEach(v=>collectAlbums(v,arr,depth+1));
+}
+
+function extractJSON(str, startToken) {
+  const start = str.indexOf(startToken);
+  if (start<0) return null;
+  let depth=0, i=start;
+  for (; i<str.length; i++) {
+    if (str[i]==='{') depth++;
+    else if (str[i]==='}') { depth--; if (depth===0) return str.slice(start,i+1); }
+  }
+  return null;
+}
+
+function renderReleases(container, releases) {
+  container.innerHTML = releases.map(r => {
+    const imgs = r.images||[];
+    const imgUrl = imgs[0]?.url||imgs[1]?.url||'';
+    const type = (r.album_type||r.type||'release').toUpperCase();
+    const date = fmtDate(r.release_date||r.releaseDate||'');
+    return `
+      <a class="release-card" href="https://open.spotify.com/album/${r.id}" target="_blank" rel="noopener">
+        <div class="release-cover-wrap">
+          ${imgUrl ? `<img src="${imgUrl}" alt="${r.name}" loading="lazy"/>` : '<div style="width:100%;height:100%;background:#111;"></div>'}
+          <div class="release-play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <span class="release-type-badge">${type}</span>
+        </div>
+        <div class="release-meta">
+          <div class="release-title">${r.name}</div>
+          ${date ? `<div class="release-date">${date}</div>` : ''}
+        </div>
+      </a>`;
+  }).join('');
+}
+
+function renderReleaseFallback(container, artist) {
+  container.innerHTML = `
+    <div style="grid-column:1/-1;">
+      <p style="font-size:.6rem;letter-spacing:.25em;color:var(--muted);margin-bottom:1rem;">open spotify to view releases</p>
+      <a class="spotify-link" href="${artist.url}" target="_blank" rel="noopener">▶ view discography on spotify</a>
+    </div>`;
+}
+
+function closeArtistPanel() { document.getElementById('artist-panel').classList.remove('open'); document.body.style.overflow=''; }
+function openForm() { document.getElementById('form-panel').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeForm() { document.getElementById('form-panel').classList.remove('open'); document.body.style.overflow=''; }
+document.addEventListener('keydown', e => { if(e.key==='Escape'){closeArtistPanel();closeForm();} });
 </script>
 </body>
 </html>
