@@ -501,7 +501,7 @@
 
   <!-- INLINE BIG PLAYER -->
   <div id="inline-player">
-    <p class="ip-label"></p>
+    <p class="ip-label">// signal · now playing</p>
     <div class="ip-main">
       <div class="ip-cover" id="ip-cover-wrap">
         <div class="ip-cover-placeholder" id="ip-cover-placeholder">
@@ -550,7 +550,7 @@
   <footer>
     <div class="footer-inner">
       <div>
-        <span class="footer-join-label"></span>
+        <span class="footer-join-label">join the network</span>
         <button class="footer-join-btn" onclick="openForm()">Want to join? →</button>
       </div>
       <div class="footer-copy">
@@ -838,6 +838,7 @@ function startHomeMorph(startWord) {
 const ARTISTS = [
   {
     name: 'lyko',
+    role: 'Artist',
     id:   '4a4GK5fSd7g9ikiIrr9bGj',
     url:  'https://open.spotify.com/artist/4a4GK5fSd7g9ikiIrr9bGj',
     socials: [
@@ -845,35 +846,40 @@ const ARTISTS = [
       { type:'tt',  label:'TikTok',     href:'https://tiktok.com/@Lil__Lyko' },
       { type:'sc',  label:'SoundCloud', href:'https://soundcloud.com/lil-lolo-480408138' },
     ],
-    // Latest releases: { title, type, year, spotifyUrl, cover (optional image url) }
-    releases: [
-      { title:'iMoney', type:'Single', year:'2026', spotifyUrl:'https://open.spotify.com/artist/4a4GK5fSd7g9ikiIrr9bGj', cover: null },
-      { title:'EMO #WWR', type:'Single', year:'2026', spotifyUrl:'https://open.spotify.com/artist/4a4GK5fSd7g9ikiIrr9bGj', cover: null },
-    ]
+    releases: []
   },
   {
     name: 'zep',
+    role: 'Artist',
     id:   '0YxYDlhiNqJoC3bBtVCUzc',
     url:  'https://open.spotify.com/artist/0YxYDlhiNqJoC3bBtVCUzc',
     socials: [
       { type:'ig',  label:'Instagram',  href:'https://instagram.com/zepeverywhere' },
       { type:'sc',  label:'SoundCloud', href:'https://soundcloud.com/zepeverywhere/albums' },
     ],
-    releases: [
-      { title:'Latest', type:'Single', year:'2026', spotifyUrl:'https://open.spotify.com/artist/0YxYDlhiNqJoC3bBtVCUzc', cover: null },
-    ]
+    releases: []
   },
   {
     name: 'radiosurgeryy',
+    role: 'Artist',
     id:   '28EkaMU18bUxqlrriy4WSO',
     url:  'https://open.spotify.com/artist/28EkaMU18bUxqlrriy4WSO',
     socials: [
       { type:'ig',  label:'Instagram',  href:'https://instagram.com/radiosurgeryy' },
       { type:'sc',  label:'SoundCloud', href:'https://soundcloud.com/pasgo45' },
     ],
-    releases: [
-      { title:'Latest', type:'Single', year:'2026', spotifyUrl:'https://open.spotify.com/artist/28EkaMU18bUxqlrriy4WSO', cover: null },
-    ]
+    releases: []
+  },
+  {
+    name: 'clpz',
+    role: 'Producer',
+    id:   null,
+    url:  null,
+    scUrl: 'https://soundcloud.com/clpz',
+    socials: [
+      { type:'sc', label:'SoundCloud', href:'https://soundcloud.com/clpz' },
+    ],
+    releases: []
   }
 ];
 
@@ -889,6 +895,7 @@ function socialIcon(type) {
 }
 
 async function getArtistImg(artist) {
+  if (!artist.url) return null;
   try {
     const r = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(artist.url)}`);
     if (r.ok) { const d = await r.json(); return d.thumbnail_url || null; }
@@ -910,7 +917,7 @@ async function buildCards() {
         ${img ? `<img src="${img}" alt="${a.name}" loading="lazy"/>` : '<div style="width:100%;height:100%;background:#111"></div>'}
         <div class="artist-card-overlay">
           <div class="artist-name">${a.name}</div>
-          <div class="artist-sub">rw2 collective</div>
+          <div class="artist-sub">${a.role || 'rw2 collective'}</div>
         </div>
         <div class="artist-arrow">view →</div>`;
       card.onclick = () => openArtistPanel(a);
@@ -942,60 +949,45 @@ async function openArtistPanel(artist) {
   const img = await getArtistImg(artist);
 
   const socialsHtml = [
-    `<a class="social-link sp" href="${artist.url}" target="_blank" rel="noopener" title="Spotify">${socialIcon('sp')}</a>`,
+    ...(artist.url ? [`<a class="social-link sp" href="${artist.url}" target="_blank" rel="noopener" title="Spotify">${socialIcon('sp')}</a>`] : []),
     ...(artist.socials || []).map(s =>
       `<a class="social-link ${s.type}" href="${s.href}" target="_blank" rel="noopener" title="${s.label}">${socialIcon(s.type)}</a>`
     )
   ].join('');
 
-  // Build release thumbnails HTML
-  // Each release gets a square tile — uses cover image if available, else a styled placeholder
-  const releasesHtml = (artist.releases || []).map(rel => {
-    const coverContent = rel.cover
-      ? `<img src="${rel.cover}" alt="${rel.title}" loading="lazy"/>`
-      : `<div class="release-thumb-placeholder"><svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z"/></svg></div>`;
-    return `
-      <a class="release-thumb" href="${rel.spotifyUrl}" target="_blank" rel="noopener" title="${rel.title}">
-        ${coverContent}
-        <div class="release-thumb-overlay">
-          <div class="release-thumb-title">${rel.title.toUpperCase()}</div>
-          <div class="release-thumb-type">${rel.type} · ${rel.year}</div>
-        </div>
-      </a>`;
-  }).join('');
-
-  // Spotify artist embed (compact list mode)
-  const spotifyEmbedSrc = `https://open.spotify.com/embed/artist/${artist.id}?utm_source=generator&theme=0`;
+  // Spotify or SoundCloud embed
+  const embedHtml = artist.url
+    ? `<p class="panel-section-label">// on spotify</p>
+       <div class="spotify-embed-wrap">
+         <iframe
+           src="https://open.spotify.com/embed/artist/${artist.id}?utm_source=generator&theme=0"
+           width="100%" height="380" frameborder="0"
+           allowfullscreen=""
+           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+           loading="lazy">
+         </iframe>
+       </div>`
+    : artist.scUrl
+    ? `<p class="panel-section-label">// on soundcloud</p>
+       <div class="spotify-embed-wrap">
+         <iframe
+           width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay"
+           src="https://w.soundcloud.com/player/?url=${encodeURIComponent(artist.scUrl)}&color=%23e8000a&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true"
+           loading="lazy">
+         </iframe>
+       </div>`
+    : '';
 
   body.innerHTML = `
     <div class="panel-artist-hero">
       ${img ? `<img class="panel-artist-img" src="${img}" alt="${artist.name}"/>` : ''}
       <div class="panel-artist-info">
         <h2>${artist.name}</h2>
-        <p class="sub">rw2 collective · worldwide</p>
+        <p class="sub">${artist.role || 'rw2 collective'} · worldwide</p>
         <div class="social-links">${socialsHtml}</div>
       </div>
     </div>
-
-    ${releasesHtml ? `
-      <p class="panel-section-label">// latest releases</p>
-      <div class="latest-releases-grid" style="grid-template-columns:repeat(${Math.min((artist.releases||[]).length, 3)},1fr)">
-        ${releasesHtml}
-      </div>
-    ` : ''}
-
-    <p class="panel-section-label">// on spotify</p>
-    <div class="spotify-embed-wrap">
-      <iframe
-        src="${spotifyEmbedSrc}"
-        width="100%"
-        height="380"
-        frameborder="0"
-        allowfullscreen=""
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy">
-      </iframe>
-    </div>
+    ${embedHtml}
   `;
 }
 
