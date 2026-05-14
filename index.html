@@ -44,6 +44,7 @@
       transition:opacity .9s ease;
     }
     #loader.fade-out { opacity:0; pointer-events:none; }
+    #loader.gone { display:none; }
 
     .loader-bar-wrap {
       width:120px; height:1px; background:#1e1e1e; position:relative; overflow:hidden;
@@ -68,19 +69,19 @@
       background:var(--black);
       display:flex; align-items:center; justify-content:center;
       flex-direction:column;
+      /* Start hidden — JS shows it after loader */
       opacity:0; pointer-events:none;
       transition:opacity .6s ease;
     }
     #entry.visible { opacity:1; pointer-events:all; }
     #entry.fade-out { opacity:0; pointer-events:none; }
+    #entry.gone { display:none; }
 
-    /* The entry morph wrapper — threshold filter applied here */
     .entry-morph-wrap {
       position:relative;
       display:flex; align-items:center; justify-content:center;
       cursor:pointer;
       filter:url('#threshold');
-      /* We need a fixed height so the filter has room */
       height:clamp(5rem,16vw,14rem);
       width:100%;
     }
@@ -96,7 +97,6 @@
       user-select:none;
       text-align:center;
       will-change:opacity,filter,transform;
-      /* We'll animate scaleX via JS for the stretch on exit */
       transform-origin:center center;
     }
 
@@ -113,13 +113,12 @@
     }
     .entry-morph-wrap:hover .entry-hint { color:var(--muted); }
 
-    /* corner labels on entry */
     .entry-corner { position:fixed; font-size:.5rem; letter-spacing:.3em; text-transform:uppercase; color:#222; }
     .entry-corner.tl { top:1.5rem; left:1.5rem; }
     .entry-corner.br { bottom:1.5rem; right:1.5rem; }
 
     /* ═══════════════════════════════════════
-       HOMEPAGE (hidden until entry clicked)
+       HOMEPAGE
     ═══════════════════════════════════════ */
     #homepage {
       opacity:0;
@@ -130,14 +129,11 @@
 
     @keyframes fadeup { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
-    /* STAGE */
     #stage { position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 
-    /* HOMEPAGE MORPH — with stretch */
     .morph-section {
       position:relative; width:100%; display:flex; align-items:center; justify-content:center;
       padding:0 2rem; filter:url('#threshold'); min-height:14vw;
-      /* overflow visible so stretched text doesn't clip */
       overflow:visible;
     }
     .morph-word {
@@ -148,14 +144,12 @@
       color:var(--white); user-select:none; text-align:center;
       will-change:opacity,filter,transform;
       transform-origin:center center;
-      /* translateX(-50%) is always applied; scaleX added on top via JS */
     }
     .morph-spacer { visibility:hidden; font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,11vw,10rem); letter-spacing:.04em; padding:.1em 0; white-space:nowrap; }
 
     .tagline { margin-top:1.5rem; font-size:clamp(.6rem,1.2vw,.85rem); letter-spacing:.35em; text-transform:uppercase; color:var(--muted); text-align:center; opacity:0; animation:fadeup 1s ease .4s forwards; }
     .line { width:1px; height:60px; background:var(--muted); margin:3rem auto; opacity:0; animation:fadeup 1s ease .7s forwards; }
 
-    /* ARTISTS */
     .artists-section { width:100%; max-width:960px; padding:0 2rem; opacity:0; animation:fadeup 1s ease .9s forwards; }
     .section-label { font-size:.65rem; letter-spacing:.4em; text-transform:uppercase; color:var(--muted); margin-bottom:2rem; }
     .artists-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; }
@@ -181,7 +175,7 @@
     .panel-close:hover { border-color:var(--red); color:var(--red); }
     .panel-body { padding:2.5rem 2rem 4rem; max-width:1000px; margin:0 auto; width:100%; }
 
-    .panel-artist-hero { display:flex; align-items:flex-end; gap:2rem; margin-bottom:3rem; padding-bottom:2.5rem; border-bottom:1px solid #1e1e1e; }
+    .panel-artist-hero { display:flex; align-items:flex-end; gap:2rem; margin-bottom:2.5rem; padding-bottom:2rem; border-bottom:1px solid #1e1e1e; }
     @media(max-width:600px) { .panel-artist-hero{flex-direction:column;align-items:flex-start;} }
     .panel-artist-img { width:110px; height:110px; border-radius:50%; object-fit:cover; filter:grayscale(15%); flex-shrink:0; border:1px solid #222; }
     .panel-artist-info h2 { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.5rem,6vw,4.5rem); letter-spacing:.06em; line-height:.9; color:var(--white); }
@@ -189,9 +183,27 @@
     .spotify-link { display:inline-flex; align-items:center; gap:.4rem; margin-top:.8rem; font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:#1DB954; text-decoration:none; border:1px solid #1DB954; padding:.35rem .7rem; transition:background .2s; }
     .spotify-link:hover { background:rgba(29,185,84,.1); }
 
+    /* SOCIAL LINKS */
+    .social-links { display:flex; align-items:center; gap:.6rem; margin-top:1rem; flex-wrap:wrap; }
+    .social-link {
+      display:inline-flex; align-items:center; gap:.35rem;
+      font-size:.55rem; letter-spacing:.2em; text-transform:uppercase;
+      color:var(--muted); text-decoration:none;
+      border:1px solid #222; padding:.3rem .6rem;
+      transition:border-color .2s,color .2s,background .2s;
+      white-space:nowrap;
+    }
+    .social-link svg { width:12px; height:12px; fill:currentColor; flex-shrink:0; }
+    .social-link:hover { border-color:var(--white); color:var(--white); }
+    .social-link.ig:hover { border-color:#c13584; color:#c13584; }
+    .social-link.tt:hover { border-color:#69C9D0; color:#69C9D0; }
+    .social-link.sc:hover { border-color:#ff5500; color:#ff5500; }
+    .social-link.yt:hover { border-color:#FF0000; color:#FF0000; }
+
     .panel-section-label { font-size:.6rem; letter-spacing:.4em; text-transform:uppercase; color:var(--muted); margin-bottom:1.5rem; }
 
-    .releases-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-bottom:4rem; }
+    /* RELEASES */
+    .releases-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-bottom:3rem; }
     @media(max-width:600px) { .releases-row{grid-template-columns:1fr 1fr;} }
 
     .release-card { display:flex; flex-direction:column; gap:.8rem; text-decoration:none; color:var(--white); cursor:pointer; transition:transform .25s; }
@@ -206,8 +218,17 @@
     .release-meta { display:flex; flex-direction:column; gap:.15rem; }
     .release-title { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:.06em; line-height:1.1; }
     .release-date { font-size:.55rem; letter-spacing:.2em; color:var(--muted); text-transform:uppercase; }
-    .release-skeleton { background:#111; border:1px solid #1a1a1a; aspect-ratio:1; }
+    .release-skeleton { background:#111; border:1px solid #1a1a1a; aspect-ratio:1; animation:skelpulse 1.4s ease infinite; }
+    @keyframes skelpulse { 0%,100%{opacity:.3} 50%{opacity:.7} }
     .panel-loading { font-size:.65rem; letter-spacing:.3em; color:var(--muted); padding:2rem 0; }
+
+    /* SOUNDCLOUD EMBED */
+    .sc-embed-wrap {
+      margin-bottom:3rem;
+      border:1px solid #1a1a1a;
+      overflow:hidden;
+    }
+    .sc-embed-wrap iframe { display:block; width:100%; }
 
     /* FOOTER */
     footer { width:100%; position:relative; z-index:1; margin-top:6rem; border-top:1px solid #1a1a1a; }
@@ -224,6 +245,120 @@
     .form-panel-title { font-family:'Bebas Neue',sans-serif; font-size:2.5rem; letter-spacing:.1em; }
     .form-embed { width:100%; max-width:680px; padding:0 1rem 2rem; }
     .form-embed iframe { width:100%; height:900px; border:none; }
+
+    /* ═══════════════════════════════════════
+       MUSIC PLAYER
+    ═══════════════════════════════════════ */
+    #music-player {
+      position:fixed;
+      bottom:1.5rem;
+      right:1.5rem;
+      z-index:6000;
+      display:none; /* shown once tracks load */
+      flex-direction:column;
+      align-items:flex-end;
+      gap:.5rem;
+    }
+    #music-player.player-ready { display:flex; }
+
+    /* Collapsed bar */
+    .player-bar {
+      display:flex;
+      align-items:center;
+      gap:.8rem;
+      background:rgba(8,8,8,.92);
+      border:1px solid #1e1e1e;
+      backdrop-filter:blur(16px);
+      padding:.6rem .9rem;
+      cursor:default;
+      max-width:280px;
+      width:100%;
+      transition:border-color .25s;
+    }
+    .player-bar:hover { border-color:#2e2e2e; }
+
+    .player-art {
+      width:34px; height:34px; flex-shrink:0;
+      border:1px solid #1e1e1e;
+      overflow:hidden;
+      position:relative;
+    }
+    .player-art img {
+      width:100%; height:100%; object-fit:cover;
+      filter:grayscale(20%);
+    }
+    .player-art .art-placeholder {
+      width:100%; height:100%;
+      background:#111;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .player-art .art-placeholder svg { width:14px; height:14px; fill:#333; }
+
+    .player-info {
+      flex:1;
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:.1rem;
+    }
+    .player-track-name {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:.85rem;
+      letter-spacing:.08em;
+      color:var(--white);
+      line-height:1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .player-track-sub {
+      font-size:.45rem;
+      letter-spacing:.25em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .player-controls {
+      display:flex;
+      align-items:center;
+      gap:.3rem;
+      flex-shrink:0;
+    }
+    .player-btn {
+      background:none;
+      border:none;
+      cursor:pointer;
+      padding:.25rem;
+      color:var(--muted);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:color .2s;
+    }
+    .player-btn:hover { color:var(--white); }
+    .player-btn svg { width:16px; height:16px; fill:currentColor; }
+    .player-btn.play-pause svg { width:18px; height:18px; }
+
+    /* Progress line */
+    .player-progress {
+      width:100%;
+      height:1px;
+      background:#1a1a1a;
+      position:relative;
+      cursor:pointer;
+    }
+    .player-progress-fill {
+      height:100%;
+      background:var(--red);
+      width:0%;
+      transition:width .5s linear;
+      pointer-events:none;
+    }
+
+    /* Volume / mute */
+    .player-vol {
+      width:12px; height:12px;
+    }
   </style>
 </head>
 <body>
@@ -250,7 +385,6 @@
 <!-- ═══════════ ENTRY SCREEN ═══════════ -->
 <div id="entry">
   <div class="entry-morph-wrap" id="entry-morph" onclick="enterSite()">
-    <!-- RW2 is base; ENTER morphs in on hover -->
     <span class="entry-word" id="ew-rw2">RW2</span>
     <span class="entry-word" id="ew-enter">ENTER</span>
     <span class="entry-hint">hover · click to enter</span>
@@ -262,7 +396,6 @@
 <!-- ═══════════ HOMEPAGE ═══════════ -->
 <div id="homepage">
   <div id="stage">
-    <!-- HOMEPAGE LOGO MORPH with stretch -->
     <div class="morph-section" id="home-morph">
       <span class="morph-spacer" aria-hidden="true">Records World Wide</span>
       <span class="morph-word" id="mw1">Records World Wide</span>
@@ -314,6 +447,38 @@
   </div>
 </div>
 
+<!-- ═══════════ MUSIC PLAYER ═══════════ -->
+<div id="music-player">
+  <div class="player-bar">
+    <div class="player-art" id="player-art">
+      <div class="art-placeholder">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z"/></svg>
+      </div>
+    </div>
+    <div class="player-info">
+      <div class="player-track-name" id="player-name">—</div>
+      <div class="player-track-sub" id="player-sub">rw2 · signal</div>
+    </div>
+    <div class="player-controls">
+      <button class="player-btn" id="btn-prev" title="Previous" onclick="playerPrev()">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+      </button>
+      <button class="player-btn play-pause" id="btn-play" title="Play/Pause" onclick="playerToggle()">
+        <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="icon-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <button class="player-btn" id="btn-next" title="Next" onclick="playerNext()">
+        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="player-progress" id="player-progress" onclick="playerSeek(event)">
+    <div class="player-progress-fill" id="player-fill"></div>
+  </div>
+</div>
+
+<audio id="player-audio"></audio>
+
 <script>
 // ════════════════════════════════════════════
 //  LOADER → ENTRY
@@ -322,11 +487,19 @@ window.addEventListener('DOMContentLoaded', () => {
   const loader = document.getElementById('loader');
   const entry  = document.getElementById('entry');
 
-  // After bar finishes (~1.5s), fade out loader, show entry
+  // Pre-set morph word states before entry becomes visible — no FOUC
+  const ewRW2   = document.getElementById('ew-rw2');
+  const ewEnter = document.getElementById('ew-enter');
+  ewRW2.style.cssText   += ';opacity:1;filter:blur(0px);transform:translateX(-50%)';
+  ewEnter.style.cssText += ';opacity:0.003;filter:blur(40px);transform:translateX(-50%)';
+
   setTimeout(() => {
     loader.classList.add('fade-out');
     setTimeout(() => {
-      loader.style.display = 'none';
+      loader.classList.add('gone');
+      // Clear any inline opacity so the .visible class can take effect
+      entry.style.opacity = '';
+      entry.style.pointerEvents = '';
       entry.classList.add('visible');
       initEntryMorph();
     }, 900);
@@ -334,25 +507,18 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ════════════════════════════════════════════
-//  ENTRY MORPH: RW2 ↔ ENTER on hover
+//  ENTRY MORPH
 // ════════════════════════════════════════════
 function initEntryMorph() {
-  const wrap   = document.getElementById('entry-morph');
-  const ewRW2  = document.getElementById('ew-rw2');
+  const wrap    = document.getElementById('entry-morph');
+  const ewRW2   = document.getElementById('ew-rw2');
   const ewEnter = document.getElementById('ew-enter');
 
-  // Initial state: RW2 visible, ENTER hidden
-  ewRW2.style.opacity   = '1';
-  ewRW2.style.filter    = 'blur(0px)';
-  ewEnter.style.opacity = '0.003';
-  ewEnter.style.filter  = 'blur(40px)';
-
   let hovering = false;
-  let animId = null;
-  let progress = 0; // 0 = RW2, 1 = ENTER
+  let animId   = null;
+  let progress = 0;
 
-  const SPEED = 0.018; // progress per frame
-
+  const SPEED = 0.018;
   function smoothstep(t) { return t * t * (3 - 2 * t); }
 
   function animate() {
@@ -364,31 +530,20 @@ function initEntryMorph() {
       animId = null;
       return;
     }
-
     const p = smoothstep(progress);
-    // RW2 fades out
-    ewRW2.style.opacity = String(1 - p * (1 - 0.003));
-    ewRW2.style.filter  = `blur(${p * 36}px)`;
-    // ENTER fades in
+    ewRW2.style.opacity   = String(1 - p * (1 - 0.003));
+    ewRW2.style.filter    = `blur(${p * 36}px)`;
     ewEnter.style.opacity = String(0.003 + p * (1 - 0.003));
     ewEnter.style.filter  = `blur(${(1 - p) * 36}px)`;
-
     animId = requestAnimationFrame(animate);
   }
 
-  wrap.addEventListener('mouseenter', () => {
-    hovering = true;
-    if (!animId) animId = requestAnimationFrame(animate);
-  });
-
-  wrap.addEventListener('mouseleave', () => {
-    hovering = false;
-    if (!animId) animId = requestAnimationFrame(animate);
-  });
+  wrap.addEventListener('mouseenter', () => { hovering = true;  if (!animId) animId = requestAnimationFrame(animate); });
+  wrap.addEventListener('mouseleave', () => { hovering = false; if (!animId) animId = requestAnimationFrame(animate); });
 }
 
 // ════════════════════════════════════════════
-//  ENTER SITE — sexy fade transition
+//  ENTER SITE — RW2 flies from centre to header
 // ════════════════════════════════════════════
 let entryDone = false;
 function enterSite() {
@@ -399,54 +554,129 @@ function enterSite() {
   const homepage = document.getElementById('homepage');
   const ewEnter  = document.getElementById('ew-enter');
   const ewRW2    = document.getElementById('ew-rw2');
+  const mw2      = document.getElementById('mw2'); // header "RW2"
 
-  // Quick stretch-out on ENTER word before fade
-  const activeWord = parseFloat(ewEnter.style.opacity) > 0.5 ? ewEnter : ewRW2;
-  activeWord.style.transition = 'transform .45s cubic-bezier(.4,0,.6,1), opacity .45s ease, filter .45s ease';
-  activeWord.style.transform  = 'translateX(-50%) scaleX(1.6)';
-  activeWord.style.opacity    = '0';
-  activeWord.style.filter     = 'blur(20px)';
+  // ── 1. If ENTER is showing, snap back to RW2 first ──
+  const showingEnter = parseFloat(ewEnter.style.opacity || '0') > 0.5;
+  if (showingEnter) {
+    ewEnter.style.transition = 'opacity .25s ease, filter .25s ease';
+    ewEnter.style.opacity    = '0.003';
+    ewEnter.style.filter     = 'blur(30px)';
+    ewRW2.style.transition   = 'opacity .25s ease, filter .25s ease';
+    ewRW2.style.opacity      = '1';
+    ewRW2.style.filter       = 'blur(0px)';
+  }
 
-  // Fade out entry, fade in homepage
+  const FLY_DELAY = showingEnter ? 280 : 0;
+
   setTimeout(() => {
-    entry.classList.add('fade-out');
-    homepage.classList.add('visible');
-    setTimeout(() => { entry.style.display = 'none'; }, 900);
-  }, 380);
 
-  // Start homepage morph loop
-  setTimeout(() => startHomeMorph(), 600);
-  // Build artist cards
-  buildCards();
+    // ── 2. Snapshot the entry RW2 position (it's still fully visible) ──
+    const srcRect = ewRW2.getBoundingClientRect();
+
+    // ── 3. Make homepage visible but transparent so layout runs ──
+    //       Use visibility trick: render but invisible, no transition yet
+    homepage.style.cssText = 'opacity:0;pointer-events:none;transition:none;';
+    homepage.classList.add('visible');
+
+    // Init morph words to RW2-showing state before layout paint
+    mw2.style.cssText += ';opacity:1;filter:blur(0px);transform:translateX(-50%) scaleX(1);';
+    document.getElementById('mw1').style.cssText += ';opacity:0.003;filter:blur(40px);transform:translateX(-50%) scaleX(1);';
+
+    // ── 4. After one frame the browser has laid out the homepage ──
+    //       Now we can accurately measure where mw2 (header RW2) lives.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+
+        const tgtRect = mw2.getBoundingClientRect();
+
+        // ── 5. Build the flying clone ──
+        // Match the entry word's rendered size exactly
+        const srcFontSize   = parseFloat(getComputedStyle(ewRW2).fontSize);
+        const clone = document.createElement('span');
+        clone.textContent   = 'RW2';
+        clone.style.cssText = `
+          position:fixed;
+          left:0; top:0;
+          font-family:'Bebas Neue',sans-serif;
+          font-size:${srcFontSize}px;
+          letter-spacing:.06em;
+          color:var(--white);
+          white-space:nowrap;
+          pointer-events:none;
+          z-index:9000;
+          transform-origin:top left;
+          will-change:transform,opacity;
+          transform: translate(${srcRect.left}px, ${srcRect.top}px);
+        `;
+        document.body.appendChild(clone);
+
+        // Measure clone's own rendered size (same font/size as ewRW2)
+        const cloneRect = clone.getBoundingClientRect();
+
+        // Scale so clone matches tgtRect dimensions
+        const scaleX = tgtRect.width  / cloneRect.width;
+        const scaleY = tgtRect.height / cloneRect.height;
+        // Translate so clone's top-left lands on tgtRect's top-left
+        const dx = tgtRect.left - srcRect.left;
+        const dy = tgtRect.top  - srcRect.top;
+
+        // Hide originals so no doubling
+        ewRW2.style.opacity = '0';
+        mw2.style.opacity   = '0';
+
+        // ── 6. Fade entry out behind the clone ──
+        entry.classList.add('fade-out');
+
+        // ── 7. Fly! ──
+        requestAnimationFrame(() => {
+          clone.style.transition = 'transform .72s cubic-bezier(.4,0,.2,1), opacity .3s ease';
+          clone.style.transform  = `translate(${srcRect.left + dx}px, ${srcRect.top + dy}px) scale(${scaleX}, ${scaleY})`;
+
+          // Fade homepage in as clone travels
+          setTimeout(() => {
+            homepage.style.transition = 'opacity .55s ease';
+            homepage.style.opacity    = '1';
+            homepage.style.pointerEvents = '';
+          }, 280);
+
+          // Clone lands — hand off to real header, start morph
+          setTimeout(() => {
+            mw2.style.opacity = '1';
+            clone.style.opacity = '0';
+            clone.style.transition = 'opacity .18s ease';
+            setTimeout(() => clone.remove(), 200);
+            startHomeMorph('rw2');
+          }, 740);
+        });
+
+        setTimeout(() => entry.classList.add('gone'), 1400);
+        buildCards();
+        initPlayer();
+      });
+    });
+
+  }, FLY_DELAY);
 }
 
 // ════════════════════════════════════════════
 //  HOMEPAGE MORPH with STRETCH
 // ════════════════════════════════════════════
-function startHomeMorph() {
+function startHomeMorph(startWord) {
   const mw1 = document.getElementById('mw1');
   const mw2 = document.getElementById('mw2');
-
-  const HOLD  = 2600; // ms each word shown
-  const TRANS = 1600; // ms transition
-  // Stretch peaks midway through transition — scaleX goes e.g. 1 → 1.18 → 1
-  // For the long word (Records World Wide → RW2), the FROM word stretches out
-  // and the TO word stretches in from narrow to normal.
-  const STRETCH_OUT = 1.22; // from-word max stretch before dissolving
-  const STRETCH_IN  = 0.82; // to-word starts squished then expands
-
-  let t0 = performance.now(), showing = 1;
+  const HOLD = 2600, TRANS = 1600;
+  const STRETCH_OUT = 1.22, STRETCH_IN = 0.82;
+  // startWord='rw2' → begin showing mw2 (RW2); otherwise start on mw1
+  let t0 = performance.now(), showing = (startWord === 'rw2') ? 2 : 1;
 
   function smoothstep(t) { return t * t * (3 - 2 * t); }
-  // Arch curve: goes 0→1→0 over t in [0,1]
   function arch(t) { return 4 * t * (1 - t); }
 
   function frame(now) {
     const e = now - t0;
-
     if (e < HOLD) {
-      // Holding — show current word cleanly
-      const cur = showing === 1 ? mw1 : mw2;
+      const cur   = showing === 1 ? mw1 : mw2;
       const other = showing === 1 ? mw2 : mw1;
       cur.style.opacity   = '1';
       cur.style.filter    = 'blur(0px)';
@@ -456,51 +686,79 @@ function startHomeMorph() {
       other.style.transform = 'translateX(-50%) scaleX(1)';
     } else {
       const raw = Math.min((e - HOLD) / TRANS, 1);
-      const p   = smoothstep(raw);   // eased progress
-      const a   = arch(raw);         // peaks at 0.5
-
+      const p   = smoothstep(raw);
+      const a   = arch(raw);
       const from = showing === 1 ? mw1 : mw2;
       const to   = showing === 1 ? mw2 : mw1;
-
-      // FROM: fade out + stretch wide as it dissolves
       from.style.opacity   = String(1 - p * (1 - 0.003));
       from.style.filter    = `blur(${p * 40}px)`;
       from.style.transform = `translateX(-50%) scaleX(${1 + a * (STRETCH_OUT - 1)})`;
-
-      // TO: fade in + un-squish from narrow to normal
       to.style.opacity   = String(0.003 + p * (1 - 0.003));
       to.style.filter    = `blur(${(1 - p) * 40}px)`;
-      // Start compressed, expand to 1 as it arrives
-      const toScale = STRETCH_IN + p * (1 - STRETCH_IN);
-      to.style.transform = `translateX(-50%) scaleX(${toScale})`;
-
-      if (e > HOLD + TRANS) {
-        showing = showing === 1 ? 2 : 1;
-        t0 = now;
-      }
+      to.style.transform = `translateX(-50%) scaleX(${STRETCH_IN + p * (1 - STRETCH_IN)})`;
+      if (e > HOLD + TRANS) { showing = showing === 1 ? 2 : 1; t0 = now; }
     }
     requestAnimationFrame(frame);
   }
 
-  // Init
-  mw1.style.opacity   = '1';
-  mw1.style.filter    = 'blur(0px)';
-  mw1.style.transform = 'translateX(-50%) scaleX(1)';
-  mw2.style.opacity   = '0.003';
-  mw2.style.filter    = 'blur(40px)';
-  mw2.style.transform = 'translateX(-50%) scaleX(1)';
-
+  // Init whichever word starts visible
+  if (startWord === 'rw2') {
+    mw2.style.opacity = '1'; mw2.style.filter = 'blur(0px)'; mw2.style.transform = 'translateX(-50%) scaleX(1)';
+    mw1.style.opacity = '0.003'; mw1.style.filter = 'blur(40px)'; mw1.style.transform = 'translateX(-50%) scaleX(1)';
+  } else {
+    mw1.style.opacity = '1'; mw1.style.filter = 'blur(0px)'; mw1.style.transform = 'translateX(-50%) scaleX(1)';
+    mw2.style.opacity = '0.003'; mw2.style.filter = 'blur(40px)'; mw2.style.transform = 'translateX(-50%) scaleX(1)';
+  }
   requestAnimationFrame(frame);
 }
 
 // ════════════════════════════════════════════
-//  ARTISTS
+//  ARTISTS DATA
 // ════════════════════════════════════════════
 const ARTISTS = [
-  {name:'lyko',         id:'4a4GK5fSd7g9ikiIrr9bGj', url:'https://open.spotify.com/artist/4a4GK5fSd7g9ikiIrr9bGj'},
-  {name:'zep',          id:'0YxYDlhiNqJoC3bBtVCUzc', url:'https://open.spotify.com/artist/0YxYDlhiNqJoC3bBtVCUzc'},
-  {name:'radiosurgeryy',id:'28EkaMU18bUxqlrriy4WSO',  url:'https://open.spotify.com/artist/28EkaMU18bUxqlrriy4WSO'}
+  {
+    name: 'lyko',
+    id:   '4a4GK5fSd7g9ikiIrr9bGj',
+    url:  'https://open.spotify.com/artist/4a4GK5fSd7g9ikiIrr9bGj',
+    socials: [
+      { type:'ig',  label:'@ItsLyko',      href:'https://instagram.com/ItsLyko' },
+      { type:'tt',  label:'@Lil__Lyko',    href:'https://tiktok.com/@Lil__Lyko' },
+      { type:'sc',  label:'SoundCloud',    href:'https://soundcloud.com/lil-lolo-480408138' },
+    ],
+    soundcloud: 'https://soundcloud.com/lil-lolo-480408138'
+  },
+  {
+    name: 'zep',
+    id:   '0YxYDlhiNqJoC3bBtVCUzc',
+    url:  'https://open.spotify.com/artist/0YxYDlhiNqJoC3bBtVCUzc',
+    socials: [
+      { type:'ig',  label:'@zepeverywhere', href:'https://instagram.com/zepeverywhere' },
+      { type:'sc',  label:'SoundCloud',     href:'https://soundcloud.com/zepeverywhere/albums' },
+    ],
+    soundcloud: 'https://soundcloud.com/zepeverywhere'
+  },
+  {
+    name: 'radiosurgeryy',
+    id:   '28EkaMU18bUxqlrriy4WSO',
+    url:  'https://open.spotify.com/artist/28EkaMU18bUxqlrriy4WSO',
+    socials: [
+      { type:'ig',  label:'@radiosurgeryy', href:'https://instagram.com/radiosurgeryy' },
+      { type:'sc',  label:'SoundCloud',     href:'https://soundcloud.com/pasgo45' },
+    ],
+    soundcloud: 'https://soundcloud.com/pasgo45'
+  }
 ];
+
+// SVG icons for social platforms
+function socialIcon(type) {
+  const icons = {
+    ig: `<svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>`,
+    tt: `<svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>`,
+    sc: `<svg viewBox="0 0 24 24"><path d="M11.56 8.87V17h8.76c.87 0 1.68-.64 1.68-1.56 0-.87-.68-1.56-1.56-1.56-.14 0-.29.02-.42.07-.05-1.17-.99-2.1-2.17-2.1-.26 0-.51.05-.74.13C16.71 10.6 15.3 9.5 13.61 9.5c-.26 0-.51.04-.75.1-.31-1.32-1.5-2.3-2.92-2.3C9 7.3 8.1 7.8 7.56 8.6A3 3 0 0 0 5.88 8C4.29 8 3 9.29 3 10.88a2.88 2.88 0 0 0 2.88 2.87h.3V9.56c0-.38.3-.69.69-.69s.69.31.69.69v8.44h4V8.87c0-.38.31-.69.69-.69s.31.31.31.69z"/></svg>`,
+    yt: `<svg viewBox="0 0 24 24"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.54 3.6 12 3.6 12 3.6s-7.54 0-9.38.45a3.02 3.02 0 0 0-2.12 2.14C.05 8.04 0 10.18 0 12s.05 3.96.5 5.81a3.02 3.02 0 0 0 2.12 2.14C4.46 20.4 12 20.4 12 20.4s7.54 0 9.38-.45a3.02 3.02 0 0 0 2.12-2.14C23.95 15.96 24 13.82 24 12s-.05-3.96-.5-5.81zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/></svg>`
+  };
+  return icons[type] || icons.sc;
+}
 
 async function getArtistImg(artist) {
   try {
@@ -512,7 +770,7 @@ async function getArtistImg(artist) {
 
 async function buildCards() {
   const grid = document.getElementById('artists-grid');
-  if (grid.children.length > 0) return; // already built
+  if (grid.children.length > 0) return;
   for (const a of ARTISTS) {
     const card = document.createElement('div');
     card.className = 'artist-card';
@@ -541,6 +799,9 @@ function fmtDate(str) {
   } catch(e) { return str; }
 }
 
+// ════════════════════════════════════════════
+//  ARTIST PANEL
+// ════════════════════════════════════════════
 async function openArtistPanel(artist) {
   const panel = document.getElementById('artist-panel');
   const title = document.getElementById('panel-title');
@@ -552,6 +813,16 @@ async function openArtistPanel(artist) {
 
   const img = await getArtistImg(artist);
 
+  // Build social links HTML
+  const socialsHtml = (artist.socials || []).map(s => `
+    <a class="social-link ${s.type}" href="${s.href}" target="_blank" rel="noopener">
+      ${socialIcon(s.type)}
+      <span>${s.label}</span>
+    </a>`).join('');
+
+  // SoundCloud embed (widget API)
+  const scEmbedSrc = `https://w.soundcloud.com/player/?url=${encodeURIComponent(artist.soundcloud)}&color=%23e8000a&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true`;
+
   body.innerHTML = `
     <div class="panel-artist-hero">
       ${img ? `<img class="panel-artist-img" src="${img}" alt="${artist.name}"/>` : ''}
@@ -559,6 +830,9 @@ async function openArtistPanel(artist) {
         <h2>${artist.name}</h2>
         <p class="sub">rw2 collective · worldwide</p>
         <a class="spotify-link" href="${artist.url}" target="_blank" rel="noopener">▶ open on spotify</a>
+        <div class="social-links">
+          ${socialsHtml}
+        </div>
       </div>
     </div>
 
@@ -567,7 +841,16 @@ async function openArtistPanel(artist) {
       ${[0,1,2].map(()=>`<div class="release-skeleton"></div>`).join('')}
     </div>
 
-    <p class="panel-section-label" style="margin-top:1rem;">// top tracks</p>
+    <p class="panel-section-label">// soundcloud</p>
+    <div class="sc-embed-wrap">
+      <iframe
+        src="${scEmbedSrc}"
+        width="100%" height="300"
+        frameborder="no" scrolling="no" allow="autoplay">
+      </iframe>
+    </div>
+
+    <p class="panel-section-label">// top tracks on spotify</p>
     <div style="width:100%;margin-bottom:2rem;">
       <iframe
         style="border-radius:0;border:1px solid #1a1a1a;"
@@ -660,6 +943,161 @@ function closeArtistPanel() { document.getElementById('artist-panel').classList.
 function openForm() { document.getElementById('form-panel').classList.add('open'); document.body.style.overflow='hidden'; }
 function closeForm() { document.getElementById('form-panel').classList.remove('open'); document.body.style.overflow=''; }
 document.addEventListener('keydown', e => { if(e.key==='Escape'){closeArtistPanel();closeForm();} });
+
+// ════════════════════════════════════════════
+//  MUSIC PLAYER
+//  Reads songs from /player/ folder.
+//  File naming: song and cover must share the same base name.
+//  e.g. player/mysong.mp3 + player/mysong.jpg (or .png / .webp)
+//
+//  The player scans a manifest at /player/manifest.json if present,
+//  otherwise it tries to load a hardcoded list you can edit below.
+//  Format of manifest.json:
+//  [
+//    {"file":"mysong.mp3","cover":"mysong.jpg","title":"My Song"},
+//    ...
+//  ]
+// ════════════════════════════════════════════
+
+let playerTracks  = [];
+let playerIndex   = 0;
+let playerPlaying = false;
+const audio       = document.getElementById('player-audio');
+
+async function initPlayer() {
+  let tracks = [];
+
+  // Try manifest first
+  try {
+    const r = await fetch('/player/manifest.json');
+    if (r.ok) tracks = await r.json();
+  } catch(e) {}
+
+  // If no manifest, auto-discover by probing common names
+  // (since browsers can't list directories).
+  // You can also hardcode track entries here as a fallback:
+  // tracks = [
+  //   { file:'song1.mp3', cover:'song1.jpg', title:'Song 1' },
+  // ];
+
+  if (!tracks.length) {
+    // Try a few numbered slots so something plays if manifest is absent
+    const probes = ['track1','track2','track3','song1','song2','song3'];
+    const exts   = ['mp3','wav','ogg','m4a'];
+    const imgExts= ['jpg','jpeg','png','webp'];
+    for (const name of probes) {
+      for (const ext of exts) {
+        try {
+          const r = await fetch(`/player/${name}.${ext}`, {method:'HEAD'});
+          if (r.ok) {
+            let cover = null;
+            for (const ie of imgExts) {
+              const cr = await fetch(`/player/${name}.${ie}`, {method:'HEAD'});
+              if (cr.ok) { cover = `/player/${name}.${ie}`; break; }
+            }
+            tracks.push({ file:`/player/${name}.${ext}`, cover, title: name });
+            break;
+          }
+        } catch(e) {}
+      }
+    }
+  } else {
+    // Normalise paths
+    tracks = tracks.map(t => ({
+      ...t,
+      file:  t.file.startsWith('/')  ? t.file  : `/player/${t.file}`,
+      cover: t.cover ? (t.cover.startsWith('/') ? t.cover : `/player/${t.cover}`) : null
+    }));
+  }
+
+  if (!tracks.length) return; // nothing found — player stays hidden
+
+  playerTracks = tracks;
+  playerIndex  = 0;
+
+  document.getElementById('music-player').classList.add('player-ready');
+  loadTrack(0, false);
+
+  // Progress ticker
+  audio.addEventListener('timeupdate', () => {
+    if (!audio.duration) return;
+    const pct = (audio.currentTime / audio.duration) * 100;
+    document.getElementById('player-fill').style.width = pct + '%';
+  });
+
+  audio.addEventListener('ended', () => playerNext());
+}
+
+function loadTrack(idx, autoplay) {
+  if (!playerTracks.length) return;
+  const t = playerTracks[idx];
+  audio.src = t.file;
+  audio.load();
+
+  // Art
+  const artEl = document.getElementById('player-art');
+  if (t.cover) {
+    artEl.innerHTML = `<img src="${t.cover}" alt="cover"/>`;
+  } else {
+    artEl.innerHTML = `<div class="art-placeholder"><svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z"/></svg></div>`;
+  }
+
+  // Name — strip extension, replace _ and - with spaces
+  const displayName = (t.title || t.file.split('/').pop().replace(/\.[^.]+$/,''))
+    .replace(/[_-]/g,' ');
+  document.getElementById('player-name').textContent = displayName.toUpperCase();
+
+  const trackNum = `${idx+1} / ${playerTracks.length}`;
+  document.getElementById('player-sub').textContent = `rw2 · ${trackNum}`;
+
+  document.getElementById('player-fill').style.width = '0%';
+
+  if (autoplay || playerPlaying) {
+    audio.play().then(() => setPlayState(true)).catch(()=>{});
+  } else {
+    setPlayState(false);
+  }
+}
+
+function setPlayState(playing) {
+  playerPlaying = playing;
+  document.getElementById('icon-play').style.display  = playing ? 'none' : '';
+  document.getElementById('icon-pause').style.display = playing ? '' : 'none';
+}
+
+function playerToggle() {
+  if (!playerTracks.length) return;
+  if (audio.paused) {
+    audio.play().then(() => setPlayState(true)).catch(()=>{});
+  } else {
+    audio.pause();
+    setPlayState(false);
+  }
+}
+
+function playerNext() {
+  if (!playerTracks.length) return;
+  playerIndex = (playerIndex + 1) % playerTracks.length;
+  loadTrack(playerIndex, true);
+}
+
+function playerPrev() {
+  if (!playerTracks.length) return;
+  if (audio.currentTime > 3) {
+    audio.currentTime = 0;
+    return;
+  }
+  playerIndex = (playerIndex - 1 + playerTracks.length) % playerTracks.length;
+  loadTrack(playerIndex, true);
+}
+
+function playerSeek(e) {
+  if (!audio.duration) return;
+  const bar  = document.getElementById('player-progress');
+  const rect = bar.getBoundingClientRect();
+  const pct  = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = pct * audio.duration;
+}
 </script>
 </body>
 </html>
