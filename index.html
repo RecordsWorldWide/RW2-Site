@@ -721,7 +721,7 @@ function enterSite() {
 
       const tgtRect = mw2.getBoundingClientRect();
       const tgtCX  = tgtRect.left + tgtRect.width  / 2;
-      const tgtCY  = (tgtRect.top + tgtRect.height / 2) - 150;
+      const tgtCY  = (tgtRect.top + tgtRect.height / 2) - 271;
 
       const srcFontPx = parseFloat(getComputedStyle(ewRW2).fontSize);
       const clone = document.createElement('span');
@@ -980,7 +980,7 @@ async function openArtistPanel(artist) {
 
   // Spotify or SoundCloud embed
   const embedHtml = artist.url
-    ? `<p class="panel-section-label">// on spotify</p>
+    ? `<p class="panel-section-label"></p>
        <div class="spotify-embed-wrap">
          <iframe
            src="https://open.spotify.com/embed/artist/${artist.id}?utm_source=generator&theme=0"
@@ -991,7 +991,7 @@ async function openArtistPanel(artist) {
          </iframe>
        </div>`
     : artist.scUrl
-    ? `<p class="panel-section-label">// on soundcloud</p>
+    ? `<p class="panel-section-label"></p>
        <div class="spotify-embed-wrap">
          <iframe
            width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay"
