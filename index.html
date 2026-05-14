@@ -288,7 +288,7 @@
 <!-- LOADER -->
 <div id="loader">
   <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
-  <div class="loader-label">initializing signal</div>
+  <div class="loader-label">RW2</div>
 </div>
 
 <!-- ENTRY -->
@@ -296,7 +296,7 @@
   <div class="entry-morph-wrap" id="entry-morph" onclick="enterSite()">
     <span class="entry-word" id="ew-rw2">RW2</span>
     <span class="entry-word" id="ew-enter">ENTER</span>
-    <span class="entry-hint">hover · click to enter</span>
+    <span class="entry-hint">RecordsWorldWide.World</span>
   </div>
   <div class="entry-corner tl">RW2</div>
   <div class="entry-corner br">Records World Wide</div>
@@ -312,17 +312,17 @@
         <span class="morph-word" id="mw2">RW2</span>
       </div>
     </div>
-    <p class="tagline">experimental music collective · worldwide</p>
-    <div class="line"></div>
+    <p class="tagline">Only the realest.</p>
+    <div class=""></div>
     <div class="artists-section">
-      <p class="section-label">// artists</p>
+      <p class="section-label">our artists</p>
       <div class="artists-grid" id="artists-grid"></div>
     </div>
   </div>
   <footer>
     <div class="footer-inner">
       <div>
-        <span class="footer-join-label">// join the network</span>
+        <span class="footer-join-label">join the network</span>
         <button class="footer-join-btn" onclick="openForm()">Want to join? →</button>
       </div>
       <div class="footer-copy">
@@ -398,6 +398,9 @@ window.addEventListener('DOMContentLoaded', () => {
   const ewEnter = document.getElementById('ew-enter');
   ewRW2.style.cssText   += ';opacity:1;filter:blur(0px);transform:translateX(-50%)';
   ewEnter.style.cssText += ';opacity:0.003;filter:blur(40px);transform:translateX(-50%)';
+
+  // Lock scroll until transition is fully complete
+  document.body.style.overflow = 'hidden';
 
   setTimeout(() => {
     loader.classList.add('fade-out');
@@ -483,7 +486,7 @@ function enterSite() {
       const tgtCX  = tgtRect.left + tgtRect.width  / 2;
       // The filter on .morph-inner shifts getBoundingClientRect Y by ~140px;
       // subtract that to get the true visual center of mw2.
-      const tgtCY  = (tgtRect.top + tgtRect.height / 2) - 140;
+      const tgtCY  = (tgtRect.top + tgtRect.height / 2) - 150;
 
       const srcFontPx = parseFloat(getComputedStyle(ewRW2).fontSize);
       const clone = document.createElement('span');
@@ -531,7 +534,10 @@ function enterSite() {
           mw2.style.opacity = '1';
           clone.style.opacity = '0';
           clone.style.transition = 'opacity .12s ease';
-          setTimeout(() => clone.remove(), 150);
+          setTimeout(() => {
+            clone.remove();
+            document.body.style.overflow = ''; // unlock scroll
+          }, 150);
           startHomeMorph('rw2');
         }, 720);
       });
