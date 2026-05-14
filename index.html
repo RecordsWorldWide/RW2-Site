@@ -3,26 +3,27 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>RW2 — Records World Wide</title>
+  <title>RW2 Forever — Only the Realest.</title>
 
   <!-- ── Open Graph / Link Preview Embed ── -->
   <meta property="og:type"        content="website"/>
   <meta property="og:url"         content="https://recordsworldwide.world/"/>
-  <meta property="og:title"       content="RecordsWorldWide (RW2)"/>
-  <meta property="og:description" content="Only the realest talent."/>
+  <meta property="og:title"       content="RW2 Forever"/>
+  <meta property="og:description" content="Only the Realest."/>
   <meta property="og:image"       content="https://recordsworldwide.world/logo.png"/>
   <meta property="og:image:alt"   content="On My Life — Lil Lyko"/>
   <meta property="og:site_name"   content="RW2 — Records World Wide"/>
 
   <!-- ── Twitter / X Card ── -->
   <meta name="twitter:card"        content="summary_large_image"/>
-  <meta name="twitter:title"       content="RecordsWorldWide (RW2)"/>
-  <meta name="twitter:description" content="Only the realest talent."/>
+  <meta name="twitter:title"       content="RW2 Forever"/>
+  <meta name="twitter:description" content="Only the Realest."/>
   <meta name="twitter:image"       content="https://recordsworldwide.world/logo.png"/>
   <meta name="twitter:image:alt"   content="On My Life — Lil Lyko"/>
 
   <!-- ── Standard meta description ── -->
-  <meta name="description" content="RecordsWorldWide (RW2) — Only the realest talent."/>
+  <meta name="description"         content="RW2 Forever — Only the Realest."/>
+  <meta name="application-name"    content="RW2 Forever"/>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -848,6 +849,7 @@ const ARTISTS = [
   {
     name: 'lyko',
     role: 'Artist',
+    country: 'USA',
     id:   '4a4GK5fSd7g9ikiIrr9bGj',
     url:  'https://open.spotify.com/artist/4a4GK5fSd7g9ikiIrr9bGj',
     socials: [
@@ -860,6 +862,7 @@ const ARTISTS = [
   {
     name: 'zep',
     role: 'Artist',
+    country: 'Latvia',
     id:   '0YxYDlhiNqJoC3bBtVCUzc',
     url:  'https://open.spotify.com/artist/0YxYDlhiNqJoC3bBtVCUzc',
     socials: [
@@ -871,6 +874,7 @@ const ARTISTS = [
   {
     name: 'radiosurgeryy',
     role: 'Artist',
+    country: 'UK',
     id:   '28EkaMU18bUxqlrriy4WSO',
     url:  'https://open.spotify.com/artist/28EkaMU18bUxqlrriy4WSO',
     socials: [
@@ -882,6 +886,7 @@ const ARTISTS = [
   {
     name: 'clpz',
     role: 'Producer',
+    country: 'Latvia',
     id:   null,
     url:  null,
     scUrl: 'https://soundcloud.com/clpz1',
@@ -1001,7 +1006,7 @@ async function openArtistPanel(artist) {
       ${img ? `<img class="panel-artist-img" src="${img}" alt="${artist.name}"/>` : ''}
       <div class="panel-artist-info">
         <h2>${artist.name}</h2>
-        <p class="sub">${artist.role || 'rw2 collective'} · worldwide</p>
+        <p class="sub">${artist.role || 'rw2 collective'} · ${artist.country || 'worldwide'}</p>
         <div class="social-links">${socialsHtml}</div>
       </div>
     </div>
