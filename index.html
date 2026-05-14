@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RW2 — Records World Wide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --red: #e8000a;
+      --white: #f0ede8;
+      --black: #080808;
+      --dim: #1a1a1a;
+      --muted: #444;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Space Mono', monospace;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      animation: grain 0.4s steps(1) infinite;
+    }
+
+    @keyframes grain {
+      0%,100% { background-position: 0 0; }
+      10% { background-position: -5% -10%; }
+      20% { background-position: -15% 5%; }
+      30% { background-position: 7% -25%; }
+      40% { background-position: -5% 25%; }
+      50% { background-position: -15% 10%; }
+      60% { background-position: 15% 0%; }
+      70% { background-position: 0% 15%; }
+      80% { background-position: 3% 35%; }
+      90% { background-position: -10% 10%; }
+    }
+
+    /* ── GRID ── */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.018;
+      background-image:
+        linear-gradient(to right, #fff 1px, transparent 1px),
+        linear-gradient(to bottom, #fff 1px, transparent 1px);
+      background-size: 3.5rem 3.5rem;
+    }
+
+    /* ── STAGE ── */
+    #stage {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── LOGO MORPH ── */
+    .morph-section {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2rem;
+      filter: url('#threshold');
+      min-height: 14vw;
+    }
+
+    .morph-word {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 11vw, 10rem);
+      letter-spacing: 0.04em;
+      color: var(--white);
+      user-select: none;
+      text-align: center;
+      will-change: opacity, filter;
+    }
+
+    .morph-spacer {
+      visibility: hidden;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 11vw, 10rem);
+      letter-spacing: 0.04em;
+      padding: 0.1em 0;
+      white-space: nowrap;
+    }
+
+    /* ── TAGLINE ── */
+    .tagline {
+      margin-top: 1.5rem;
+      font-size: clamp(0.6rem, 1.2vw, 0.85rem);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      opacity: 0;
+      animation: fadeup 1s ease 0.8s forwards;
+    }
+
+    @keyframes fadeup {
+      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(8px); }
+    }
+
+    /* ── DIVIDER ── */
+    .line {
+      width: 1px;
+      height: 60px;
+      background: var(--muted);
+      margin: 3rem auto;
+      opacity: 0;
+      animation: fadeup 1s ease 1.2s forwards;
+    }
+
+    /* ── ARTISTS SECTION ── */
+    .artists-section {
+      width: 100%;
+      max-width: 960px;
+      padding: 0 2rem 0;
+      opacity: 0;
+      animation: fadeup 1s ease 1.4s forwards;
+    }
+
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+
+    .artists-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+
+    @media (max-width: 600px) {
+      .artists-grid { grid-template-columns: 1fr; }
+    }
+
+    .artist-card {
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      aspect-ratio: 1;
+      background: var(--dim);
+      border: 1px solid #1e1e1e;
+      transition: border-color 0.3s;
+    }
+
+    .artist-card:hover {
+      border-color: var(--red);
+    }
+
+    .artist-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(40%) contrast(1.1);
+      transition: filter 0.4s, transform 0.5s;
+    }
+
+    .artist-card:hover img {
+      filter: grayscale(0%) contrast(1.05);
+      transform: scale(1.04);
+    }
+
+    .artist-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.2rem;
+    }
+
+    .artist-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      letter-spacing: 0.05em;
+      color: var(--white);
+      line-height: 1;
+    }
+
+    .artist-sub {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 0.2rem;
+    }
+
+    .artist-arrow {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--red);
+      opacity: 0;
+      transition: opacity 0.3s;
+      text-transform: uppercase;
+    }
+
+    .artist-card:hover .artist-arrow { opacity: 1; }
+
+    /* ── LOADING PLACEHOLDER ── */
+    .artist-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+    }
+
+    /* ── ARTIST OVERLAY PANEL ── */
+    #artist-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(4,4,4,0.97);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    #artist-panel.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .panel-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(4,4,4,0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    .panel-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 6vw, 4rem);
+      letter-spacing: 0.08em;
+      color: var(--white);
+      line-height: 1;
+    }
+
+    .panel-close {
+      background: none;
+      border: 1px solid var(--muted);
+      color: var(--white);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .panel-close:hover { border-color: var(--red); color: var(--red); }
+
+    .panel-body {
+      padding: 2rem;
+      max-width: 960px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .panel-artist-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    .panel-artist-img {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      filter: grayscale(20%);
+      flex-shrink: 0;
+    }
+
+    .panel-artist-info h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.5rem;
+      letter-spacing: 0.08em;
+      line-height: 1;
+    }
+
+    .panel-artist-info p {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      color: var(--muted);
+      margin-top: 0.3rem;
+      text-transform: uppercase;
+    }
+
+    .spotify-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #1DB954;
+      text-decoration: none;
+      border: 1px solid #1DB954;
+      padding: 0.3rem 0.6rem;
+      transition: background 0.2s;
+    }
+
+    .spotify-link:hover { background: rgba(29,185,84,0.1); }
+
+    .releases-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .releases-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .release-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--white);
+      transition: transform 0.2s;
+    }
+
+    .release-item:hover { transform: translateY(-3px); }
+
+    .release-cover {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      filter: grayscale(20%) contrast(1.05);
+      transition: filter 0.3s;
+    }
+
+    .release-item:hover .release-cover { filter: grayscale(0%) contrast(1.05); }
+
+    .release-name {
+      font-size: 0.75rem;
+      line-height: 1.3;
+      font-weight: 700;
+    }
+
+    .release-type {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .panel-loading {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--muted);
+      padding: 2rem 0;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      margin-top: 6rem;
+      border-top: 1px solid #1a1a1a;
+    }
+
+    .footer-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2rem;
+    }
+
+    .footer-join {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .footer-join-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .footer-join-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--white);
+      background: none;
+      border: 1px solid var(--muted);
+      padding: 0.6rem 1.2rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .footer-join-btn:hover { border-color: var(--red); color: var(--red); }
+
+    .footer-copy {
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      color: #333;
+      line-height: 1.8;
+      max-width: 520px;
+    }
+
+    /* ── FORM OVERLAY ── */
+    #form-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(4,4,4,0.97);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 2rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      overflow-y: auto;
+    }
+
+    #form-panel.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .form-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 680px;
+      padding: 0 1rem 1.5rem;
+    }
+
+    .form-panel-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.5rem;
+      letter-spacing: 0.1em;
+    }
+
+    .form-embed {
+      width: 100%;
+      max-width: 680px;
+      padding: 0 1rem 2rem;
+    }
+
+    .form-embed iframe {
+      width: 100%;
+      height: 900px;
+      border: none;
+      background: transparent;
+    }
+
+    /* ── SCAN LINE ── */
+    @keyframes scanmove {
+      0% { top: -5%; }
+      100% { top: 105%; }
+    }
+
+    .scanline {
+      position: fixed;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: rgba(255,255,255,0.03);
+      pointer-events: none;
+      z-index: 9998;
+      animation: scanmove 7s linear infinite;
+    }
+  </style>
+</head>
+<body>
+
+<!-- SVG filters -->
+<svg style="position:absolute;height:0;width:0" aria-hidden="true">
+  <defs>
+    <filter id="threshold" color-interpolation-filters="sRGB">
+      <feColorMatrix in="SourceGraphic" type="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 20 -8"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="grid-bg"></div>
+<div class="scanline"></div>
+
+<!-- ── MAIN STAGE ── -->
+<div id="stage">
+
+  <!-- LOGO MORPH -->
+  <div class="morph-section" id="morph">
+    <span class="morph-spacer" aria-hidden="true">Records World Wide</span>
+    <span class="morph-word" id="mw1">Records World Wide</span>
+    <span class="morph-word" id="mw2">RW2</span>
+  </div>
+
+  <p class="tagline">experimental music collective · worldwide</p>
+  <div class="line"></div>
+
+  <!-- ARTISTS -->
+  <div class="artists-section">
+    <p class="section-label">// artists</p>
+    <div class="artists-grid" id="artists-grid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-join">
+      <span class="footer-join-label">// join the network</span>
+      <button class="footer-join-btn" onclick="openForm()">Want to join? →</button>
+    </div>
+    <div class="footer-copy">
+      2026 © RW2 — Records World Wide is a non-registered or trademarked business under general copyright laws.<br>
+      no borders · no genre · just signal
+    </div>
+  </div>
+</footer>
+
+<!-- ── ARTIST PANEL ── -->
+<div id="artist-panel">
+  <div class="panel-header">
+    <span class="panel-title" id="panel-title">—</span>
+    <button class="panel-close" onclick="closeArtistPanel()">✕ close</button>
+  </div>
+  <div class="panel-body" id="panel-body">
+    <p class="panel-loading">loading signal...</p>
+  </div>
+</div>
+
+<!-- ── FORM PANEL ── -->
+<div id="form-panel">
+  <div class="form-panel-header">
+    <span class="form-panel-title">Join RW2</span>
+    <button class="panel-close" onclick="closeForm()">✕ close</button>
+  </div>
+  <div class="form-embed">
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfCqNg_p1ED6ppeUjJzvkLmaUn7elS4-c_dfDjR4iu6jh8O4Q/viewform?embedded=true"
+      frameborder="0" marginheight="0" marginwidth="0" loading="lazy">Loading…</iframe>
+  </div>
+</div>
+
+<script>
+  // ── MORPH ANIMATION ──
+  const mw1 = document.getElementById('mw1');
+  const mw2 = document.getElementById('mw2');
+  const HOLD = 2600, TRANS = 1600;
+  let t0 = performance.now(), showing = 1;
+  function smoothstep(t) { return t * t * (3 - 2 * t); }
+  function morphFrame(now) {
+    const e = now - t0;
+    if (e < HOLD) {
+      if (showing === 1) {
+        mw1.style.opacity = 1; mw1.style.filter = 'blur(0px)';
+        mw2.style.opacity = 0.003; mw2.style.filter = 'blur(40px)';
+      } else {
+        mw2.style.opacity = 1; mw2.style.filter = 'blur(0px)';
+        mw1.style.opacity = 0.003; mw1.style.filter = 'blur(40px)';
+      }
+    } else {
+      const p = smoothstep(Math.min((e - HOLD) / TRANS, 1));
+      const from = showing === 1 ? mw1 : mw2;
+      const to = showing === 1 ? mw2 : mw1;
+      from.style.opacity = 1 - p * (1 - 0.003);
+      from.style.filter = `blur(${p * 40}px)`;
+      to.style.opacity = 0.003 + p * (1 - 0.003);
+      to.style.filter = `blur(${(1 - p) * 40}px)`;
+      if (e > HOLD + TRANS) { showing = showing === 1 ? 2 : 1; t0 = now; }
+    }
+    requestAnimationFrame(morphFrame);
+  }
+  requestAnimationFrame(morphFrame);
+
+  // ── ARTISTS CONFIG ──
+  const ARTISTS = [
+    {
+      name: 'lyko',
+      spotifyId: '4a4GK5fSd7g9ikiIrr9bGj',
+      spotifyUrl: 'https://open.spotify.com/artist/4a4GK5fSd7g9ikiIrr9bGj'
+    },
+    {
+      name: 'zep',
+      spotifyId: '0YxYDlhiNqJoC3bBtVCUzc',
+      spotifyUrl: 'https://open.spotify.com/artist/0YxYDlhiNqJoC3bBtVCUzc'
+    },
+    {
+      name: 'radiosurgeryy',
+      spotifyId: '28EkaMU18bUxqlrriy4WSO',
+      spotifyUrl: 'https://open.spotify.com/artist/28EkaMU18bUxqlrriy4WSO'
+    }
+  ];
+
+  // ── SPOTIFY oEmbed + fallback placeholder ──
+  // We use Spotify's public oEmbed to pull artist image (no token needed for artist images)
+  // For releases we use the public embed endpoint.
+
+  async function getArtistData(artist) {
+    // Spotify oEmbed gives us thumbnail (artist image) — no auth required
+    try {
+      const oembed = await fetch(
+        `https://open.spotify.com/oembed?url=${encodeURIComponent(artist.spotifyUrl)}`
+      );
+      if (oembed.ok) {
+        const data = await oembed.json();
+        return { img: data.thumbnail_url, title: data.title };
+      }
+    } catch(e) {}
+    return { img: null, title: artist.name };
+  }
+
+  // Build artist cards using oEmbed images
+  async function buildArtistCards() {
+    const grid = document.getElementById('artists-grid');
+    grid.innerHTML = '';
+    for (const artist of ARTISTS) {
+      const card = document.createElement('div');
+      card.className = 'artist-card';
+      card.innerHTML = `<div class="artist-loading">loading...</div>`;
+      card.addEventListener('click', () => openArtistPanel(artist));
+      grid.appendChild(card);
+
+      getArtistData(artist).then(({ img }) => {
+        card.innerHTML = `
+          ${img ? `<img src="${img}" alt="${artist.name}" loading="lazy"/>` : `<div style="width:100%;height:100%;background:#111;"></div>`}
+          <div class="artist-card-overlay">
+            <div class="artist-name">${artist.name}</div>
+            <div class="artist-sub">on spotify ↗</div>
+          </div>
+          <div class="artist-arrow">view →</div>
+        `;
+        card.addEventListener('click', () => openArtistPanel(artist));
+      });
+    }
+  }
+
+  buildArtistCards();
+
+  // ── ARTIST PANEL ──
+  async function openArtistPanel(artist) {
+    const panel = document.getElementById('artist-panel');
+    const title = document.getElementById('panel-title');
+    const body = document.getElementById('panel-body');
+    title.textContent = artist.name;
+    body.innerHTML = `<p class="panel-loading">pulling files...</p>`;
+    panel.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    // Load artist image via oEmbed
+    const { img } = await getArtistData(artist);
+
+    // We embed the Spotify artist page via embed iframe for latest releases
+    // This gives us real Spotify data visually, no API key needed
+    body.innerHTML = `
+      <div class="panel-artist-header">
+        ${img ? `<img class="panel-artist-img" src="${img}" alt="${artist.name}"/>` : ''}
+        <div class="panel-artist-info">
+          <h2>${artist.name}</h2>
+          <p>rw2 collective</p>
+          <a class="spotify-link" href="${artist.spotifyUrl}" target="_blank" rel="noopener">
+            ▶ open on spotify
+          </a>
+        </div>
+      </div>
+      <p class="releases-label">// latest releases</p>
+      <div style="width:100%;max-width:700px;">
+        <iframe
+          style="border-radius:0;border:1px solid #1a1a1a;"
+          src="https://open.spotify.com/embed/artist/${artist.spotifyId}?utm_source=generator&theme=0"
+          width="100%"
+          height="380"
+          frameBorder="0"
+          allowfullscreen=""
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy">
+        </iframe>
+      </div>
+    `;
+  }
+
+  function closeArtistPanel() {
+    document.getElementById('artist-panel').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // ── FORM PANEL ──
+  function openForm() {
+    document.getElementById('form-panel').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeForm() {
+    document.getElementById('form-panel').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // ESC to close
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeArtistPanel();
+      closeForm();
+    }
+  });
+</script>
+</body>
+</html>
