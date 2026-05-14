@@ -475,7 +475,7 @@
     <p class="tagline">Only the realest.</p>
     <div class=""></div>
     <div class="artists-section">
-      <p class="section-label">Talent list</p>
+      <p class="section-label">Talent</p>
       <div class="artists-grid" id="artists-grid"></div>
     </div><!-- /artists-section -->
     <div class="" style="margin-top:3rem;margin-bottom:0;opacity:1;animation:none;"></div>
@@ -484,7 +484,7 @@
   <!-- INLINE BIG PLAYER -->
   <div id="inline-player">
 
-    <p class="ip-label"></p>
+    <p class="ip-label">// signal · now playing</p>
     <div class="ip-main">
       <div class="ip-cover" id="ip-cover-wrap">
         <div class="ip-cover-placeholder" id="ip-cover-placeholder">
@@ -762,9 +762,8 @@ function enterSite() {
       }, 1400);
       initPlayer().then(() => {
         if (!playerTracks.length) return;
-        const randIdx = Math.floor(Math.random() * playerTracks.length);
-        playerIndex = randIdx;
-        loadTrack(randIdx, true);
+        playerIndex = 0;
+        loadTrack(0, true);
       });
 
     })));
