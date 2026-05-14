@@ -157,8 +157,17 @@
 
     .artists-section { width:100%; max-width:960px; padding:0 2rem; opacity:0; animation:fadeup 1s ease .9s forwards; }
     .section-label { font-size:.65rem; letter-spacing:.4em; text-transform:uppercase; color:var(--muted); margin-bottom:2rem; }
-    .artists-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; }
-    @media(max-width:600px) { .artists-grid{grid-template-columns:1fr;} }
+    .artists-grid { display:grid; gap:2px; }
+    .artists-grid.count-1 { grid-template-columns:1fr; }
+    .artists-grid.count-2 { grid-template-columns:repeat(2,1fr); }
+    .artists-grid.count-3 { grid-template-columns:repeat(3,1fr); }
+    .artists-grid.count-4 { grid-template-columns:repeat(2,1fr); }
+    .artists-grid.count-5 { grid-template-columns:repeat(3,1fr); }
+    .artists-grid.count-6 { grid-template-columns:repeat(3,1fr); }
+    @media(max-width:600px) {
+      .artists-grid { grid-template-columns:1fr!important; }
+      .artists-grid .artist-card { grid-column:1!important; aspect-ratio:1!important; }
+    }
 
     .artist-card { position:relative; cursor:pointer; overflow:hidden; aspect-ratio:1; background:var(--dim); border:1px solid #1e1e1e; transition:border-color .3s; }
     .artist-card:hover { border-color:var(--red); }
@@ -875,9 +884,9 @@ const ARTISTS = [
     role: 'Producer',
     id:   null,
     url:  null,
-    scUrl: 'https://soundcloud.com/clpz',
+    scUrl: 'https://soundcloud.com/clpz1',
     socials: [
-      { type:'sc', label:'SoundCloud', href:'https://soundcloud.com/clpz' },
+      { type:'sc', label:'SoundCloud', href:'https://soundcloud.com/clpz1' },
     ],
     releases: []
   }
@@ -895,17 +904,26 @@ function socialIcon(type) {
 }
 
 async function getArtistImg(artist) {
-  if (!artist.url) return null;
-  try {
-    const r = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(artist.url)}`);
-    if (r.ok) { const d = await r.json(); return d.thumbnail_url || null; }
-  } catch(e) {}
+  if (artist.url) {
+    try {
+      const r = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(artist.url)}`);
+      if (r.ok) { const d = await r.json(); return d.thumbnail_url || null; }
+    } catch(e) {}
+  }
+  if (artist.scUrl) {
+    try {
+      const r = await fetch(`https://soundcloud.com/oembed?url=${encodeURIComponent(artist.scUrl)}&format=json`);
+      if (r.ok) { const d = await r.json(); return d.thumbnail_url || null; }
+    } catch(e) {}
+  }
   return null;
 }
 
 async function buildCards() {
   const grid = document.getElementById('artists-grid');
   if (grid.children.length > 0) return;
+  const count = ARTISTS.length;
+  grid.classList.add(`count-${Math.min(count, 6)}`);
   for (const a of ARTISTS) {
     const card = document.createElement('div');
     card.className = 'artist-card';
