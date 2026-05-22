@@ -25,7 +25,7 @@
   <meta name="description"         content="RW2 Forever — Only the Realest."/>
   <meta name="application-name"    content="RW2 Forever"/>
 
-  <link rel="icon" id="favicon" href="rw2.png" type="image/png"/>
+  <link rel="icon" id="favicon" href="RW2.png" type="image/png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet"/>
@@ -886,18 +886,6 @@ const ARTISTS = [
     releases: []
   },
   {
-    name: 'radiosurgeryy',
-    role: 'Artist',
-    country: 'United Kingdom',
-    id:   '28EkaMU18bUxqlrriy4WSO',
-    url:  'https://open.spotify.com/artist/28EkaMU18bUxqlrriy4WSO',
-    socials: [
-      { type:'ig',  label:'Instagram',  href:'https://instagram.com/radiosurgeryy' },
-      { type:'sc',  label:'SoundCloud', href:'https://soundcloud.com/pasgo45' },
-    ],
-    releases: []
-  },
-  {
     name: 'clpz',
     role: 'Producer',
     country: 'Latvia',
@@ -1373,21 +1361,7 @@ function playerSeek(e) {
 function setFavicon(coverUrl) {
   const link = document.getElementById('favicon');
   if (!link) return;
-  if (coverUrl) {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = canvas.height = 64;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, 64, 64);
-      link.href = canvas.toDataURL('image/png');
-    };
-    img.onerror = () => { link.href = 'rw2.png'; };
-    img.src = coverUrl;
-  } else {
-    link.href = 'rw2.png';
-  }
+  link.href = 'RW2.png';
 }
 </script>
 </body>
