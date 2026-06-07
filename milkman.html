@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LYKO THE MILKMAN — Official Artist Page</title>
+
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://recordsworldwide.world/lyko-the-milkman"/>
+  <meta property="og:title" content="LYKO THE MILKMAN — Official Artist Page"/>
+  <meta property="og:description" content="Official artist page for LYKO THE MILKMAN. Managed by lykonzep@gmail.com"/>
+  <meta property="og:image" content="https://recordsworldwide.world/logo.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="LYKO THE MILKMAN — Official Artist Page"/>
+  <meta name="twitter:description" content="Official artist page for LYKO THE MILKMAN. Managed by lykonzep@gmail.com"/>
+  <meta name="twitter:image" content="https://recordsworldwide.world/logo.png"/>
+  <meta name="description" content="Official artist page for LYKO THE MILKMAN. Contact: lykonzep@gmail.com | Spotify Verified Artist"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --red: #e8000a;
+      --white: #f0ede8;
+      --black: #080808;
+      --dim: #1a1a1a;
+      --muted: #444;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; min-height:100%; background:var(--black); color:var(--white); font-family:'Space Mono',monospace; overflow-x:hidden; }
+
+    body::before {
+      content:''; position:fixed; inset:0; z-index:9999; pointer-events:none; opacity:0.035;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:200px 200px; animation:grain .4s steps(1) infinite;
+    }
+    @keyframes grain {
+      0%,100%{background-position:0 0} 10%{background-position:-5% -10%} 20%{background-position:-15% 5%}
+      30%{background-position:7% -25%} 40%{background-position:-5% 25%} 50%{background-position:-15% 10%}
+      60%{background-position:15% 0%} 70%{background-position:0% 15%} 80%{background-position:3% 35%} 90%{background-position:-10% 10%}
+    }
+    .grid-bg { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.018; background-image:linear-gradient(to right,#fff 1px,transparent 1px),linear-gradient(to bottom,#fff 1px,transparent 1px); background-size:3.5rem 3.5rem; }
+
+    .container { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:3rem 2rem; }
+
+    .header { text-align:center; margin-bottom:3rem; padding-bottom:2rem; border-bottom:1px solid #1e1e1e; }
+    .artist-name { font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,10vw,6rem); letter-spacing:.06em; line-height:1; color:var(--white); }
+    .artist-sub { font-size:.6rem; letter-spacing:.4em; text-transform:uppercase; color:var(--muted); margin-top:.5rem; }
+    .badge { display:inline-flex; align-items:center; gap:.4rem; margin-top:1rem; font-size:.55rem; letter-spacing:.3em; text-transform:uppercase; color:var(--red); border:1px solid var(--red); padding:.4rem .8rem; }
+    .badge::before { content:''; width:6px; height:6px; background:var(--red); border-radius:50%; animation:pulse 1.5s ease infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    .section { margin-bottom:2.5rem; }
+    .section-label { font-size:.55rem; letter-spacing:.4em; text-transform:uppercase; color:var(--muted); margin-bottom:1rem; display:block; }
+
+    .verify-box { background:var(--dim); border:1px solid #1e1e1e; padding:1.5rem; margin-bottom:2rem; }
+    .verify-box:hover { border-color:var(--red); }
+    .verify-title { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:.06em; margin-bottom:.5rem; }
+    .verify-text { font-size:.75rem; line-height:1.7; color:#aaa; }
+    .email-highlight { color:var(--red); font-weight:700; letter-spacing:.05em; }
+
+    .spotify-embed-wrap { border:1px solid #1a1a1a; overflow:hidden; margin-bottom:2rem; }
+    .spotify-embed-wrap iframe { display:block; width:100%; border:none; }
+
+    .links-grid { display:grid; gap:8px; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); }
+    .link-card { display:flex; align-items:center; gap:1rem; background:var(--dim); border:1px solid #1e1e1e; padding:1rem 1.2rem; text-decoration:none; color:var(--white); transition:border-color .3s, transform .2s; }
+    .link-card:hover { border-color:var(--red); transform:translateY(-2px); }
+    .link-icon { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:1px solid #222; flex-shrink:0; }
+    .link-icon svg { width:16px; height:16px; fill:currentColor; }
+    .link-info { min-width:0; }
+    .link-name { font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; font-weight:700; }
+    .link-url { font-size:.55rem; color:var(--muted); margin-top:.15rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .footer { text-align:center; margin-top:4rem; padding-top:2rem; border-top:1px solid #1e1e1e; }
+    .footer-text { font-size:.55rem; letter-spacing:.2em; color:#333; line-height:1.8; }
+    .footer-email { color:var(--red); font-weight:700; }
+
+    .meta-row { display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; margin-top:1rem; justify-content:center; }
+    .meta-item { font-size:.55rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+    .meta-item span { color:var(--white); }
+
+    @media(max-width:500px) {
+      .container { padding:2rem 1rem; }
+      .links-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<div class="container">
+  <header class="header">
+    <h1 class="artist-name">LYKO THE MILKMAN</h1>
+    <p class="artist-sub">Artist · United States · RW2 Collective</p>
+    <div class="badge">Official Artist Page</div>
+    <div class="meta-row">
+      <div class="meta-item">Spotify ID: <span>1SxtVPvwaEEHXAr24qXtxB</span></div>
+      <div class="meta-item">Label: <span>RW2 — Records World Wide</span></div>
+    </div>
+  </header>
+
+  <section class="section">
+    <span class="section-label">Verification</span>
+    <div class="verify-box">
+      <div class="verify-title">Artist Verification</div>
+      <p class="verify-text">
+        This page confirms that <span class="email-highlight">lykonzep@gmail.com</span> is the official management 
+        contact for LYKO THE MILKMAN. This artist is part of the RW2 — Records World Wide collective.
+        <br><br>
+        For Spotify Artist Support verification purposes: The email address 
+        <span class="email-highlight">lykonzep@gmail.com</span> is publicly listed on this official artist page 
+        and is directly connected to the management of LYKO THE MILKMAN.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Spotify Profile</span>
+    <div class="spotify-embed-wrap">
+      <iframe 
+        src="https://open.spotify.com/embed/artist/1SxtVPvwaEEHXAr24qXtxB?utm_source=generator&theme=0"
+        width="100%" height="380" frameborder="0"
+        allowfullscreen=""
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy">
+      </iframe>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Official Links</span>
+    <div class="links-grid">
+      <a class="link-card" href="https://open.spotify.com/artist/1SxtVPvwaEEHXAr24qXtxB" target="_blank" rel="noopener">
+        <div class="link-icon" style="color:#1DB954; border-color:#1DB95433;">
+          <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        </div>
+        <div class="link-info">
+          <div class="link-name">Spotify</div>
+          <div class="link-url">open.spotify.com/artist/1SxtVPvwaEEHXAr24qXtxB</div>
+        </div>
+      </a>
+
+      <a class="link-card" href="https://recordsworldwide.world" target="_blank" rel="noopener">
+        <div class="link-icon" style="color:var(--white); border-color:#333;">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
+        <div class="link-info">
+          <div class="link-name">Official Website</div>
+          <div class="link-url">recordsworldwide.world</div>
+        </div>
+      </a>
+
+      <a class="link-card" href="mailto:lykonzep@gmail.com">
+        <div class="link-icon" style="color:var(--red); border-color:var(--red)33;">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        </div>
+        <div class="link-info">
+          <div class="link-name">Management Email</div>
+          <div class="link-url" style="color:var(--red);">lykonzep@gmail.com</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p class="footer-text">
+      2026 © LYKO THE MILKMAN — Official Artist Page<br>
+      Managed by <span class="footer-email">lykonzep@gmail.com</span><br>
+      Part of RW2 — Records World Wide
+    </p>
+  </footer>
+</div>
+
+</body>
+</html>
